@@ -193,7 +193,8 @@
             app:isb_track_background_size="2dp"
             app:isb_track_progress_color="@color/colorPrimary"
             app:isb_track_progress_size="4dp"
-            app:isb_only_thumb_draggable="false"/>
+            app:isb_only_thumb_draggable="false"
+            />
 
 
         <com.google.android.material.button.MaterialButton
