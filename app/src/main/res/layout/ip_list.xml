@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:background="@android:color/transparent">
+
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent">
+
+        <ImageView
+            android:layout_width="75dp"
+            android:layout_height="75dp"
+            android:id="@+id/imageView"
+            android:src="@drawable/pc_icon"
+            android:padding="5dp"
+            android:background="@android:color/transparent" />
+
+        <TextView
+            android:layout_height="fill_parent"
+            android:layout_width="fill_parent"
+            android:textSize="25sp"
+            android:textAlignment="textStart"
+            android:minHeight="25dp"
+            android:id="@+id/text"
+            android:padding="5dp"
+            android:text="IP Address"
+            android:layout_marginTop="15dp"
+            android:background="@android:color/transparent" />
+    </TableRow>
+
+
+</LinearLayout>
