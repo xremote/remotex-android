@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorPrimary"
+    android:focusableInTouchMode="true"
+    tools:context=".MouseActivity">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:animationCache="false"
+        android:background="@color/colorPrimaryDark">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/Sensitivity_layout"
+            android:background="@color/colorPrimary"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Sensitivity "
+                android:fontFamily="sans-serif-light"
+                android:id="@+id/textView3"
+                android:layout_gravity="left|top"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="10dp"
+                android:textColor="@color/colorAccent"
+                android:layout_above="@+id/TrackPad" />
+
+            <SeekBar
+                android:layout_width="fill_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/Sensitivity"
+                android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
+                android:layout_toRightOf="@+id/textView3"
+                android:layout_toEndOf="@+id/textView3"
+
+                android:max="100"
+                android:progress="50"
+                android:indeterminate="false"
+                android:keepScreenOn="true" />
+
+
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:text="Track Pad"
+            android:id="@+id/TrackPad"
+            android:fontFamily="sans-serif-light"
+            android:layout_below="@+id/Sensitivity_layout"
+            android:layout_centerHorizontal="true"
+            android:layout_above="@+id/Left_Click"
+            android:textAllCaps="true"
+            android:textSize="50dp"
+            android:textAlignment="center"
+            android:gravity="center"
+            android:textColor="@color/colorAccent" />
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:id="@+id/Left_Click"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Left Click"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:layout_toLeftOf="@+id/Middle_Click"
+            android:singleLine="false"
+            android:textColor="@color/colorText"
+            app:cornerRadius="5dp"
+            app:strokeColor="@color/colorAccent"
+            />
+
+
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:id="@+id/Middle_Click"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:text="Middle"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@+id/TrackPad"
+            android:textColor="@color/colorText"
+            app:cornerRadius="5dp"
+            app:strokeColor="@color/colorAccent"/>
+
+        <com.google.android.material.button.MaterialButton
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:id="@+id/Right_Click"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="Right Click"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentEnd="true"
+            android:layout_alignParentBottom="true"
+            android:textColor="@color/colorText"
+            android:layout_below="@+id/TrackPad"
+            android:layout_toRightOf="@+id/Middle_Click"
+            app:cornerRadius="5dp"
+            app:strokeColor="@color/colorAccent"
+            />
+
+
+    </RelativeLayout>
+
+</RelativeLayout>

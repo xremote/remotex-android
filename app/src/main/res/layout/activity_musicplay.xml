@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.fiction.remotex.MusicplayActivity">
+
+
+    <ImageButton
+        android:layout_width="75sp"
+        android:layout_height="75sp"
+        android:scaleType="fitCenter"
+        android:id="@+id/play_pause"
+        android:src="@drawable/playpause"
+        android:background="#000000"
+        android:layout_alignTop="@+id/forward"
+        android:layout_centerHorizontal="true"
+        android:onClick="playpause" />
+
+    <ImageButton
+        android:layout_width="75sp"
+        android:layout_height="75sp"
+        android:id="@+id/forward"
+        android:scaleType="fitCenter"
+        android:src="@drawable/fastforward"
+        android:background="#000000"
+        android:layout_marginBottom="74dp"
+        android:layout_marginRight="50sp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:onClick="nexttrack" />
+
+    <ImageButton
+        android:layout_width="75sp"
+        android:layout_height="75sp"
+        android:scaleType="fitCenter"
+        android:id="@+id/imageButton"
+        android:src="@drawable/backward1"
+        android:background="#000000"
+        android:layout_below="@+id/allpic"
+        android:layout_marginLeft="50sp"
+        android:onClick="previoustrack" />
+
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/allpic"
+        android:scaleType="fitCenter"
+        android:src="@drawable/all"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="54dp"
+        android:layout_above="@+id/play_pause"
+        android:layout_alignParentEnd="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Open Mediaplayer"
+        android:id="@+id/mediaplayer"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignEnd="@+id/imageButton"
+        android:background="#111111"
+        android:textColor="#ffffff"
+        android:onClick="openmedia" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Open Playlist"
+        android:id="@+id/playlist"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignBottom="@+id/mediaplayer"
+        android:background="#111111"
+        android:textColor="#ffffff"
+        android:onClick="openplaylist" />
+
+    <ImageButton
+        android:layout_width="50sp"
+        android:layout_height="50sp"
+        android:scaleType="fitCenter"
+        android:id="@+id/volup"
+        android:src="@drawable/volumeup"
+        android:background="#000000"
+        android:layout_alignTop="@+id/voldown"
+        android:layout_toStartOf="@+id/play_pause"
+        android:layout_marginBottom="20sp"
+        android:layout_toLeftOf="@+id/textView11"
+        android:layout_marginRight="15dp"
+        android:onClick="volplus" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Volume"
+        android:id="@+id/textView11"
+        android:layout_alignBottom="@+id/volup"
+        android:layout_centerHorizontal="true"
+        android:textSize="25dp" />
+
+    <ImageButton
+        android:layout_width="50sp"
+        android:layout_height="50sp"
+        android:scaleType="fitCenter"
+        android:id="@+id/voldown"
+        android:src="@drawable/volumedown"
+        android:background="#000000"
+        android:layout_alignParentBottom="true"
+        android:layout_toEndOf="@+id/play_pause"
+        android:layout_marginBottom="20sp"
+        android:layout_toRightOf="@+id/textView11"
+        android:layout_marginLeft="15dp"
+        android:onClick="volminus" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mute"
+        android:id="@+id/Mute"
+        android:textColor="#0b0b0b"
+        android:onClick="volmute"
+        android:layout_alignTop="@+id/allpic"
+        android:layout_alignParentEnd="true" />
+
+</RelativeLayout>

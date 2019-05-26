@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/colorWhite"
+    android:visibility="visible"
+    tools:context="com.fiction.remotex.SplashScreen">
+
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/imageView"
+        android:fontFamily="sans-serif-medium"
+        android:text="RemoteX"
+        android:layout_centerHorizontal="true"
+        android:textColor="@color/colorPrimary"
+        android:textSize="40sp" />
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="50sp"
+        android:layout_height="60sp"
+        android:layout_centerInParent="true"
+        android:adjustViewBounds="false"
+        android:background="#FFFFFF"
+        android:cropToPadding="true"
+        android:src="@drawable/splash_icon"
+        android:tint="@color/colorPrimary" />
+
+
+</RelativeLayout>

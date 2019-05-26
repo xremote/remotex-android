@@ -1,0 +1,42 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:background="#3d4d54"
+    tools:context=".ScreenActivity">
+
+
+    <ImageView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:id="@+id/Screen"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true"
+        android:src="@drawable/screenshare"
+        android:layout_margin="0dp"
+        android:contentDescription="test_image"
+        android:scaleType="fitXY" />
+
+    <TableRow
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/buttons"
+        android:visibility="gone">
+
+        <ImageButton
+            android:layout_width="55dp"
+            android:layout_height="40dp"
+            android:id="@+id/return_b"
+            android:src="@drawable/enter_b"
+            android:scaleType="fitXY"
+            android:layout_weight="1" />
+
+        <ImageButton
+            android:layout_width="55dp"
+            android:layout_height="40dp"
+            android:id="@+id/R_click"
+            android:src="@drawable/mouse"
+            android:scaleType="fitXY"
+            android:layout_weight="1" />
+    </TableRow>
+
+</RelativeLayout>
