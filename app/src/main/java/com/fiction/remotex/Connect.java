@@ -192,7 +192,7 @@ public class Connect extends Activity {
                     showMenu();
                 }
                 else{
-                    showMenu();
+                    //showMenu();
                 }
                 runOnUiThread(new Runnable() {
                     public void run() {

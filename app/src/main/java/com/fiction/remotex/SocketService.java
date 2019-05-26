@@ -286,6 +286,7 @@ public class SocketService extends Service {
 
     public void connect(String hostname)
     {
+
         if(socket==null){
 
             tryhostname = hostname;
@@ -394,6 +395,7 @@ public class SocketService extends Service {
     public void onDestroy() {
         super.onDestroy();
         try {
+            disconnect();
             socket.close();
 
         } catch (Exception e) {
