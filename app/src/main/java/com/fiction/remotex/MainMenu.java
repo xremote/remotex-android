@@ -42,6 +42,10 @@ import androidx.appcompat.app.ActionBarDrawerToggle;
 import android.view.MenuItem;
 
 import com.google.android.material.navigation.NavigationView;
+import com.warkiz.widget.Indicator;
+import com.warkiz.widget.IndicatorSeekBar;
+import com.warkiz.widget.OnSeekChangeListener;
+import com.warkiz.widget.SeekParams;
 
 import androidx.drawerlayout.widget.DrawerLayout;
 
@@ -79,6 +83,25 @@ public class MainMenu extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+        IndicatorSeekBar seekBar = (IndicatorSeekBar) findViewById(R.id.vol_slider);
+
+        seekBar.setOnSeekChangeListener(new OnSeekChangeListener() {
+            @Override
+            public void onSeeking(SeekParams seekParams) {
+                socketServiceObject.sendMessage("^setvolume;"+seekParams.progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(IndicatorSeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(IndicatorSeekBar seekBar) {
+
+            }
+        });
 
 
         Button Left =(Button)findViewById(R.id.Left_Click);
@@ -191,6 +214,8 @@ public class MainMenu extends AppCompatActivity
                 return true;
             }
         });
+
+
 
 
         final Handler handler = new Handler();
