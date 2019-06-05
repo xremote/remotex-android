@@ -117,7 +117,7 @@ public class MainMenu extends AppCompatActivity
                     z = 1;
                 }
                 send1();
-                return true;
+                return false;
 
             }
         });
@@ -139,7 +139,7 @@ public class MainMenu extends AppCompatActivity
                     z=3;
                 }
                 send1();
-                return true;
+                return false;
             }
         });
 
@@ -159,7 +159,7 @@ public class MainMenu extends AppCompatActivity
                     z=5;
                 }
                 send1();
-                return true;
+                return false;
             }
         });
 
