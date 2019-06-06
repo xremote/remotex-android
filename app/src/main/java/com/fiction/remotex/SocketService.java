@@ -6,8 +6,11 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -45,7 +48,7 @@ public class SocketService extends Service {
     BufferedReader br;
     private static final String TAG = "zedmessage";
 
-
+    private int count = 0;
     @Override
     public IBinder onBind(Intent intent) {
         // TODO Auto-generated method stub
@@ -67,6 +70,21 @@ public class SocketService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+
+
+        final Thread newt = new Thread() {
+            @Override
+            public void run() {
+                while(true) {
+                    Log.e(this.getClass().toString(), count + "");
+                    count++;
+
+                    android.os.SystemClock.sleep(2000);
+                }
+            }
+        };
+        Log.e(this.getClass().toString(),"what");
+        newt.start();
 
 
     }
@@ -213,8 +231,6 @@ public class SocketService extends Service {
 
         percentdownloaded=100;
             //Close the streams
-
-
             //Toast.makeText(SocketService.this, recievedl + "copied" + totalbytes, Toast.LENGTH_LONG).show();
 
             myOutput.flush();
@@ -231,12 +247,14 @@ public class SocketService extends Service {
 
 
     public void sendMessage(final String message){
+        check_connection();
+
         final Thread tm = new Thread() {
             @Override
             public void run() {
-                Log.i(TAG,"sendmsg: "+ message);
+                Log.e(TAG,"sendmsg: "+ message);
                 if (out != null && !out.checkError()) {
-                    Log.i(TAG,"sendmsg2: "+ message);
+                    Log.e(TAG,"sendmsg2: "+ message);
                     //Toast.makeText(SocketService.this,"message",Toast.LENGTH_LONG).show();
                     try {
                         out.println(message);
@@ -244,7 +262,9 @@ public class SocketService extends Service {
                         Log.e(TAG,"sendmsg3: "+ e);
                     }
                     out.flush();
-                    Log.i(TAG,"sendmsg4: "+ message);
+                    Log.e(TAG,"sendmsg4: "+ message);
+                }else{
+                    Log.e(TAG,"can't sendmsg4: "+ message);
                 }
 
             }
@@ -259,10 +279,9 @@ public class SocketService extends Service {
     public String recieveMessage(){
         String line = null;
 
-
         try{
             line = br.readLine();
- }
+         }
         catch(Exception e){
          Log.i(TAG,"exe " + e);
             //Toast.makeText(SocketService.this, "exe " + e, Toast.LENGTH_LONG).show();
@@ -272,9 +291,17 @@ public class SocketService extends Service {
            return line;
     }
 
+    public void check_connection(){
 
+        if( !isconnected() ) {
+            disconnect();
+            Toast.makeText(SocketService.this, "Disconnected", Toast.LENGTH_SHORT).show();
+            Intent dialogIntent = new Intent(this, Connect.class);
+            dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            this.startActivity(dialogIntent);
+        }
 
-
+    }
 
 
     @Override
@@ -288,7 +315,6 @@ public class SocketService extends Service {
     {
 
         if(socket==null){
-
             tryhostname = hostname;
             Runnable connect = new connectSocket();
             new Thread(connect).start();
@@ -298,10 +324,8 @@ public class SocketService extends Service {
 
     public boolean isconnected()
     {
-
-
         try{
-            if(socket == null)
+            if(socket==null || !socket.isConnected() || out == null || out.checkError())
                 return false;
             else
                 return true;
@@ -395,6 +419,7 @@ public class SocketService extends Service {
     public void onDestroy() {
         super.onDestroy();
         try {
+
             disconnect();
             socket.close();
 

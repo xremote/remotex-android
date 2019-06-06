@@ -1,8 +1,5 @@
 package com.fiction.remotex;
 
-/**
- * Created by Lalit on 11/5/2016.
- */
 
 import android.content.Context;
 import android.net.wifi.WifiManager;
@@ -52,12 +49,14 @@ public class WifiApManager {
                 if ((splitted != null) && (splitted.length >= 4)) {
                     // Basic sanity check
                     String mac = splitted[3];
-
+                    //InetAddress.getByName(splitted[0]);
+                    Log.e(this.getClass().toString(), splitted[0]);
                     if (mac.matches("..:..:..:..:..:..")) {
                         boolean isReachable = InetAddress.getByName(splitted[0]).isReachable(reachableTimeout);
-
+                        Log.e(this.getClass().toString(), splitted[0] + isReachable + InetAddress.getByName(splitted[0]).getCanonicalHostName());
                         if (!onlyReachables || isReachable) {
-                            result.add(new ClientScanResult(splitted[0], splitted[3], splitted[5], isReachable));
+                            String ip_hostname = InetAddress.getByName(splitted[0]).getCanonicalHostName();
+                            result.add(new ClientScanResult(ip_hostname, splitted[3], splitted[5], isReachable));
                         }
                     }
                 }

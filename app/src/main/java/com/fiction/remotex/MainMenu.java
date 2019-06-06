@@ -215,9 +215,6 @@ public class MainMenu extends AppCompatActivity
             }
         });
 
-
-
-
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -294,8 +291,12 @@ public class MainMenu extends AppCompatActivity
     }
 
     public void disconnect(View V){
-        Intent i1 = new Intent(this, SocketService.class);
-        stopService(i1);
+
+        Log.e(this.getClass().toString(),"Disconnecting2");
+        socketServiceObject.disconnect();
+        //Intent i1 = new Intent(this, SocketService.class);
+        //stopService(i1);
+        //unbindService(serviceConnection);
 
         Intent i = new Intent(this, Connect.class);
         startActivity(i);
