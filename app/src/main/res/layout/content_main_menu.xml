@@ -254,8 +254,6 @@
                     android:textSize="30dp"
                     android:textAlignment="center"
                     android:gravity="center"
-
-
                     android:textColor="@color/colorTextTransparent" />
 
                 <com.google.android.material.button.MaterialButton
@@ -270,7 +268,6 @@
                     android:layout_toLeftOf="@+id/Middle_Click"
                     android:singleLine="false"
                     android:textColor="@color/colorPrimary"
-
                     app:cornerRadius="5dp"
                     app:strokeColor="@color/colorAccent"
                     />

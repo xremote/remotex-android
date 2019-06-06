@@ -59,13 +59,10 @@ public class MouseActivity extends Activity
                     z = 1;
                 }
                 send1();
-                return true;
+                return false;
 
             }
         });
-
-
-
 
 
         Button Right =(Button)findViewById(R.id.Right_Click);
@@ -81,11 +78,9 @@ public class MouseActivity extends Activity
                     z=3;
                 }
                 send1();
-                return true;
+                return false;
             }
         });
-
-
 
 
         Button Middle =(Button)findViewById(R.id.Middle_Click);
@@ -101,12 +96,11 @@ public class MouseActivity extends Activity
                     z=5;
                 }
                 send1();
-                return true;
+                return false;
             }
         });
 
 
-        seekbar();
 
         TextView Trackpad =(TextView)findViewById(R.id.TrackPad);
         Trackpad.setOnTouchListener(new View.OnTouchListener() {
@@ -159,6 +153,9 @@ public class MouseActivity extends Activity
             }
         });
 
+
+
+        seekbar();
     }
 
 

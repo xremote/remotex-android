@@ -94,18 +94,6 @@ public class Connect extends Activity {
         getConnectedDevices.start();
     }
 
-    private String getNameByIP(String IPAddr){
-        String hostName = "";
-        try{
-            hostName = InetAddress.getByName(IPAddr).getHostName();
-            if(hostName.contains(IPAddr)){
-                hostName = "";
-            }
-        }catch(Exception e){
-
-        }
-        return hostName;
-    }
 
     public void showDevicesList() {
 
@@ -113,7 +101,7 @@ public class Connect extends Activity {
 
         int index =0;
         for(ClientScanResult device : devicesArray){
-            namesArray[index] = device.getIpAddr() + ":\n" + getNameByIP(device.getIpAddr());
+            namesArray[index] = device.getIpAddr() + ":";
             index++;
         }
 

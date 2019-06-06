@@ -117,7 +117,7 @@ public class MainMenu extends AppCompatActivity
                     z = 1;
                 }
                 send1();
-                return true;
+                return false;
 
             }
         });
@@ -139,7 +139,7 @@ public class MainMenu extends AppCompatActivity
                     z=3;
                 }
                 send1();
-                return true;
+                return false;
             }
         });
 
@@ -159,7 +159,7 @@ public class MainMenu extends AppCompatActivity
                     z=5;
                 }
                 send1();
-                return true;
+                return false;
             }
         });
 
@@ -214,9 +214,6 @@ public class MainMenu extends AppCompatActivity
                 return true;
             }
         });
-
-
-
 
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -294,8 +291,12 @@ public class MainMenu extends AppCompatActivity
     }
 
     public void disconnect(View V){
-        Intent i1 = new Intent(this, SocketService.class);
-        stopService(i1);
+
+        Log.e(this.getClass().toString(),"Disconnecting2");
+        socketServiceObject.disconnect();
+        //Intent i1 = new Intent(this, SocketService.class);
+        //stopService(i1);
+        //unbindService(serviceConnection);
 
         Intent i = new Intent(this, Connect.class);
         startActivity(i);
