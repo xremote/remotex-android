@@ -86,6 +86,26 @@ public class ExplorerActivity extends Activity
             }
         });
 
+        pd = new ProgressDialog(ExplorerActivity.this);
+        pd.setTitle("Please Wait...");
+        pd.setMessage("Downloading to Storage/Download/Remote Devices/");
+        pd.setProgressStyle(pd.STYLE_HORIZONTAL);
+        pd.setCancelable(false);
+        pd.setIndeterminate(false);
+
+        pd.setButton(DialogInterface.BUTTON_NEGATIVE, "Close", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.e(this.getClass().toString(),"Close");
+                objectservice.downloadingfile=false;
+                pd.setTitle("Please Wait...");
+                pd.setMessage("Downloading to Storage/Download/Remote Devices/");
+
+            }
+        });
+
+
+        pd.dismiss();
 
 
     }
@@ -93,12 +113,15 @@ public class ExplorerActivity extends Activity
 
     @Override
     public void onBackPressed() {
-        Log.e(this.getClass().toString(),"this " + path);
         if(objectservice.downloadingfile || pd.isShowing()){
             return;
         }
+            goback();
+    }
 
-        goback();
+    public boolean athome(){
+        ListView viewlist = (ListView) findViewById(R.id.listView);
+        return (viewlist.getChildCount() == 1);
 
     }
 
@@ -125,11 +148,11 @@ public class ExplorerActivity extends Activity
         {
             s1=parts[j];
             if(s1.charAt(0)=='0')
-            {   names.add(s1.substring(1));images.add(R.drawable.images);}
+            {   names.add(s1.substring(1));images.add(R.drawable.pc_material_icon);}
             else if(s1.charAt(0)=='1')
-            {   names.add(s1.substring(1));images.add(R.drawable.folder);}
+            {   names.add(s1.substring(1));images.add(R.drawable.folder_material_icon);}
             else if(s1.charAt(0)=='2')
-            {   names.add(s1.substring(1));images.add(R.drawable.file);}
+            {   names.add(s1.substring(1));images.add(R.drawable.file_material_icon);}
         }
         namesArray = new String[names.size()];
         names.toArray(namesArray);
@@ -143,26 +166,6 @@ public class ExplorerActivity extends Activity
 
         Log.i(TAG,"list view " + a);
 
-        pd = new ProgressDialog(ExplorerActivity.this);
-        pd.setTitle("Please Wait...");
-        pd.setMessage("Downloading to Storage/Download/Remote Devices/");
-        pd.setProgressStyle(pd.STYLE_HORIZONTAL);
-        pd.setCancelable(false);
-        pd.setIndeterminate(false);
-
-        pd.setButton(DialogInterface.BUTTON_NEGATIVE, "Close", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Log.e(this.getClass().toString(),"Close");
-                objectservice.downloadingfile=false;
-                pd.setTitle("Please Wait...");
-                pd.setMessage("Downloading to Storage/Download/Remote Devices/");
-
-            }
-        });
-
-
-        pd.dismiss();
         nameValue(a);
         listView = (ListView) findViewById(R.id.listView);
         ArrayAdapter<String> adapter = new CustomAdapter(this,namesArray,imagesArray);
@@ -201,12 +204,14 @@ public class ExplorerActivity extends Activity
 
     public void goback(){
 
+        if(athome()){
+            super.onBackPressed(); // go back to previous activity
+        }
+
         Log.i(TAG,path);
         if(path=="" || path==null || (path.indexOf('\\')==-1))
             reset();
         else{
-
-
 
             String temp = path.substring(0,path.lastIndexOf('\\'));
             // Log.i(TAG,"1st "+temp);
@@ -216,8 +221,6 @@ public class ExplorerActivity extends Activity
             {  path="";  send("My Computer", -1); }
             else
             {path = temp2; send(path, 1);}
-
-
         }
 
     }
