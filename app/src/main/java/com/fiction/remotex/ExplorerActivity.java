@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -46,7 +47,7 @@ public class ExplorerActivity extends Activity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_explorer);
-        listview("0My Computer");//RECEIVE STRING HERE
+        reset(); //reset path and show default my computer screen
         Log.i(TAG, "created");
 
         ImageButton reset_b =(ImageButton)findViewById(R.id.Home);
@@ -121,7 +122,12 @@ public class ExplorerActivity extends Activity
 
     public boolean athome(){
         ListView viewlist = (ListView) findViewById(R.id.listView);
-        return (viewlist.getChildCount() == 1);
+
+        if(viewlist.getChildCount() == 1 && path==""){
+            return ((String) viewlist.getItemAtPosition(0)).contains("My Computer");
+        }
+
+        return false;
 
     }
 
@@ -155,23 +161,36 @@ public class ExplorerActivity extends Activity
             {   names.add(s1.substring(1));images.add(R.drawable.file_material_icon);}
         }
         namesArray = new String[names.size()];
+        imagesArray = new Integer[images.size()];
         names.toArray(namesArray);
 
-        imagesArray = new Integer[images.size()];
+
         images.toArray(imagesArray);
     }
 
     public void listview(String a) {
 
+        listView = (ListView) findViewById(R.id.listView);
+        RelativeLayout empty_l =  (RelativeLayout) findViewById(R.id.empty_folder_layout);
+        empty_l.setVisibility(RelativeLayout.GONE);
+        namesArray = new String[0];
+        imagesArray = new Integer[0];
 
-        Log.i(TAG,"list view " + a);
+        if(a==null || a.isEmpty()){
+            ArrayAdapter<String> adapter = new CustomAdapter(this,namesArray,imagesArray);
+            listView.setAdapter(adapter);
+            listView.setFocusable(true);
+            empty_l.setVisibility(RelativeLayout.VISIBLE);
+
+            return;
+        }
+
+        Log.e(this.getClass().toString(),"listview : " + a);
 
         nameValue(a);
-        listView = (ListView) findViewById(R.id.listView);
         ArrayAdapter<String> adapter = new CustomAdapter(this,namesArray,imagesArray);
         listView.setAdapter(adapter);
         listView.setFocusable(true);
-
 
         listView.setOnItemClickListener(
                 new AdapterView.OnItemClickListener() {
@@ -246,14 +265,12 @@ public class ExplorerActivity extends Activity
 
     public void reset()
     {
-
         path="";
         listview("0My Computer");
     }
 
 
     public void send(String v,int p) {
-
 
         if(p==-1){
             objectservice.sendMessage("&0" + v);
@@ -269,10 +286,7 @@ public class ExplorerActivity extends Activity
             @Override
             public void run() {
                     try {
-
                         final String updatelist = objectservice.recieveMessage();
-
-                        Log.i(TAG,"Exception list1: " + updatelist);
 
                         runOnUiThread(new Runnable() {
                             public void run() {

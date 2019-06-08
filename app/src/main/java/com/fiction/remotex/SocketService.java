@@ -217,29 +217,36 @@ public class SocketService extends Service {
             buffer1.order(ByteOrder.LITTLE_ENDIAN);
             totalbytes = (int) buffer1.getLong();
 
-
+        int flg=0;
         if(totalbytes>0) {
             int unitpercent = totalbytes / 100;
-            while (recievedl < totalbytes && (length = is.read(buffer, 0, buffer.length)) > 0) {
+            socket.setSoTimeout(2000);
+            try {
+                while (recievedl < totalbytes && (length = is.read(buffer, 0, buffer.length)) > 0) {
 
-                if(!downloadingfile){
-                    break;
+                    if(!downloadingfile && flg==0){
+                        android.os.SystemClock.sleep(3000);
+                        flg=1;
+                    }
+                    myOutput.write(buffer, 0, length);
+
+                    recievedl += length;
+                    Log.e(this.getClass().toString(),"pd "+percentdownloaded);
+                    percentdownloaded = (int) (1.0 * recievedl / unitpercent);
                 }
-                myOutput.write(buffer, 0, length);
-
-                recievedl += length;
-                Log.e(this.getClass().toString(),""+percentdownloaded);
-                percentdownloaded = (int) (1.0 * recievedl / unitpercent);
             }
-        }
+            catch (Exception e){
+                Log.e(this.getClass().toString(),"error " + e.getMessage());
+            }
 
+        }
+        socket.setSoTimeout(0);
+        Log.e(this.getClass().toString(),"pd out"+percentdownloaded);
         if(recievedl ==totalbytes){
             percentdownloaded=100;
         }
 
         downloadingfile = false;
-            //Close the streams
-            //Toast.makeText(SocketService.this, recievedl + "copied" + totalbytes, Toast.LENGTH_LONG).show();
 
             myOutput.flush();
             myOutput.close();
@@ -250,7 +257,7 @@ public class SocketService extends Service {
 
 
 
-
+public boolean donow = true;
 
     public void sendMessage(final String message){
         check_connection();
@@ -264,7 +271,9 @@ public class SocketService extends Service {
                     //Toast.makeText(SocketService.this,"message",Toast.LENGTH_LONG).show();
                     try {
                         out.println(message);
+
                     } catch (Exception e) {
+                        donow=true;
                         Log.e(TAG,"sendmsg3: "+ e);
                     }
                     out.flush();
@@ -279,21 +288,33 @@ public class SocketService extends Service {
 
     }
 
+public boolean checkasc(String line){
+        for(int i=0;i<line.length();i++){
 
+            if(line.charAt(i)<32 ||  line.charAt(i)>127 )
+                return false;
+        }
+        return true;
+}
 
 
     public String recieveMessage(){
         String line = null;
-
         try{
-            line = br.readLine();
+                line = br.readLine();
+                Log.e(this.getClass().toString(),   donow + " br " + line);
          }
         catch(Exception e){
+            Log.e(this.getClass().toString(), "bre " + line);
          Log.i(TAG,"exe " + e);
             //Toast.makeText(SocketService.this, "exe " + e, Toast.LENGTH_LONG).show();
         }
-      if(line==null)
+      if(line==null){
           line ="nula";
+      }
+//      else if(!checkasc(line)){
+//          line = recieveMessage();
+//      }
            return line;
     }
 
