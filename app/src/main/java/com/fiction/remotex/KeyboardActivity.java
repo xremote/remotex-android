@@ -20,13 +20,30 @@ public class KeyboardActivity extends Activity
 
     String sendoutput="";
 
-    SocketService  objectservice;
+    SocketService socketServiceObject;
     boolean isbound = false;
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
 
 
+    @Override
+    protected void onResume() {
+        Log.e(this.getClass().toString(),"keyresumes");
+        Intent i = new Intent(this,SocketService.class);
+        bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
+        super.onResume();
+    }
 
-        public void switchkeys(){
+    @Override
+    protected void onPause() {
+        unbindService(serviceConnection);
+        super.onPause();
+    }
+
+    public void switchkeys(){
 
             LinearLayout nlayout1 = (LinearLayout)findViewById(R.id.nlayout);
 
@@ -45,8 +62,6 @@ public class KeyboardActivity extends Activity
 
 
         setContentView(R.layout.activity_keyboard);
-        Intent i = new Intent(this,SocketService.class);
-        bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
 
 
 
@@ -330,7 +345,7 @@ public class KeyboardActivity extends Activity
         if(sendoutput!="")
         {
 
-            objectservice.sendMessage("@"+sendoutput);
+            socketServiceObject.sendMessage("@"+sendoutput);
 
             sendoutput="";
 
@@ -345,14 +360,15 @@ public class KeyboardActivity extends Activity
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
 
             SocketService.LocalBinder binder = (SocketService.LocalBinder) iBinder;
-            objectservice = binder.getService();
+            Log.e(this.getClass().toString(),"keybinded");
+            socketServiceObject = binder.getService();
             isbound=true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
 
-            objectservice = null;
+            socketServiceObject = null;
             isbound = false;
         }
     };

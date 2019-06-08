@@ -47,6 +47,7 @@ public class SocketService extends Service {
     InetAddress serverAddr;
     BufferedReader br;
     private static final String TAG = "zedmessage";
+    public boolean downloadingfile = false;
 
     private int count = 0;
     @Override
@@ -93,6 +94,7 @@ public class SocketService extends Service {
 
 
     }
+
 
 
 
@@ -161,8 +163,6 @@ public class SocketService extends Service {
         isrecieving=false;   bmpimage = BitmapFactory.decodeFile(outFileName);
             // is.close();
 
-
-
     }
 
 
@@ -173,6 +173,7 @@ public class SocketService extends Service {
             int bytesrecieved = 0;
             int count = 1;
             int totalbytes = 0;
+            downloadingfile = true;
 
             File dir = new File(Environment.getExternalStorageDirectory() + "/Download/Remote Devices/Downloaded");
 
@@ -181,6 +182,7 @@ public class SocketService extends Service {
 
             String outFileName = Environment.getExternalStorageDirectory() + "/Download/Remote Devices/Downloaded/" + savename;
             File myfile = new File(outFileName);
+
 
         try{
 
@@ -220,24 +222,28 @@ public class SocketService extends Service {
             int unitpercent = totalbytes / 100;
             while (recievedl < totalbytes && (length = is.read(buffer, 0, buffer.length)) > 0) {
 
-
+                if(!downloadingfile){
+                    break;
+                }
                 myOutput.write(buffer, 0, length);
 
                 recievedl += length;
-
+                Log.e(this.getClass().toString(),""+percentdownloaded);
                 percentdownloaded = (int) (1.0 * recievedl / unitpercent);
             }
         }
 
-        percentdownloaded=100;
+        if(recievedl ==totalbytes){
+            percentdownloaded=100;
+        }
+
+        downloadingfile = false;
             //Close the streams
             //Toast.makeText(SocketService.this, recievedl + "copied" + totalbytes, Toast.LENGTH_LONG).show();
 
             myOutput.flush();
             myOutput.close();
             //   is.close();
-
-
 
     }
 
@@ -334,8 +340,6 @@ public class SocketService extends Service {
             Log.i(TAG,"er "+e);
             return  false;
         }
-
-
     }
 
 
@@ -381,17 +385,16 @@ public class SocketService extends Service {
                catch(Exception e){
 
                    tryhostname=null;
+                   return;
                }
 
-                   InetSocketAddress clAddress = (InetSocketAddress)socket.getLocalSocketAddress();
+                InetSocketAddress clAddress = (InetSocketAddress)socket.getLocalSocketAddress();
                clientname = clAddress.getHostName();
 
                 InetSocketAddress seAddress = (InetSocketAddress)socket.getRemoteSocketAddress();
                 servername = seAddress.getHostName();
 
                 try {
-
-
                     //send the message to the server
                     out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
                     dis =   new DataInputStream(socket.getInputStream());
@@ -417,7 +420,8 @@ public class SocketService extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+
+        Log.e(this.getClass().toString(),"destroying");
         try {
 
             disconnect();
@@ -428,6 +432,14 @@ public class SocketService extends Service {
             e.printStackTrace();
         }
         socket = null;
+        try{
+            Log.e(this.getClass().toString(),"please die service");
+            android.os.Process.killProcess(android.os.Process.myPid());
+
+        }catch (Exception e){
+
+        }
+        super.onDestroy();
     }
 
 

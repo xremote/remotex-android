@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -36,16 +37,15 @@ public class ExplorerActivity extends Activity
     public static String path="";
     SocketService  objectservice;
     boolean isbound = false;
-    public   ProgressDialog pd;
-
+    public ProgressDialog pd;
+    private Boolean downloading = false;
+    private Boolean stopdownloading = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_explorer);
-        Intent i = new Intent(this,SocketService.class);
-        bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
         listview("0My Computer");//RECEIVE STRING HERE
         Log.i(TAG, "created");
 
@@ -91,6 +91,16 @@ public class ExplorerActivity extends Activity
     }
 
 
+    @Override
+    public void onBackPressed() {
+        Log.e(this.getClass().toString(),"this " + path);
+        if(objectservice.downloadingfile || pd.isShowing()){
+            return;
+        }
+
+        goback();
+
+    }
 
     public void nameValue(String s) {
 
@@ -139,6 +149,19 @@ public class ExplorerActivity extends Activity
         pd.setProgressStyle(pd.STYLE_HORIZONTAL);
         pd.setCancelable(false);
         pd.setIndeterminate(false);
+
+        pd.setButton(DialogInterface.BUTTON_NEGATIVE, "Close", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Log.e(this.getClass().toString(),"Close");
+                objectservice.downloadingfile=false;
+                pd.setTitle("Please Wait...");
+                pd.setMessage("Downloading to Storage/Download/Remote Devices/");
+
+            }
+        });
+
+
         pd.dismiss();
         nameValue(a);
         listView = (ListView) findViewById(R.id.listView);
@@ -151,9 +174,7 @@ public class ExplorerActivity extends Activity
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
-
-                        String value = (String) listView.getItemAtPosition(i);
+                 String value = (String) listView.getItemAtPosition(i);
 
                         if (parts[i].charAt(0) == '1') {
 
@@ -201,11 +222,24 @@ public class ExplorerActivity extends Activity
 
     }
 
-
     public void refresh(){
         send(path,1);
     }
 
+    @Override
+    protected void onResume() {
+
+        Intent i = new Intent(this,SocketService.class);
+        bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        objectservice.downloadingfile  = false;
+        unbindService(serviceConnection);
+        super.onPause();
+    }
 
     public void reset()
     {
@@ -253,8 +287,6 @@ public class ExplorerActivity extends Activity
 
         };
 
-
-
         t.start();
 
 
@@ -273,6 +305,8 @@ public class ExplorerActivity extends Activity
         pd.setProgress(objectservice.percentdownloaded);
         pd.setCancelable(false);
         Log.i(TAG,"send start4");
+
+        objectservice.downloadingfile = true;
         final Thread t = new Thread() {
             @Override
             public void run() {
@@ -293,11 +327,12 @@ public class ExplorerActivity extends Activity
 
                 int i=0;
                 Log.i(TAG,"send start7");
-                while(objectservice.percentdownloaded<100) {
+                while(objectservice.percentdownloaded<100 && objectservice.downloadingfile) {
                     try {
                         pd.setProgress(objectservice.percentdownloaded);
                         sleep(200);
                         i+=2;
+                        Log.e(this.getClass().toString(),""+objectservice.percentdownloaded);
                             if(i>100 && objectservice.percentdownloaded<1)
                                 break;
                     }
@@ -307,11 +342,24 @@ public class ExplorerActivity extends Activity
                         Log.i(TAG,"send start8");
                     }
                 }
-
                 //       Log.i(TAG," seconds" + i);
                 Log.i(TAG,"send start9");
-                pd.setCancelable(true);
-                pd.dismiss();
+
+                Log.e(this.getClass().toString(),"done");
+
+                runOnUiThread(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                pd.setProgress(objectservice.percentdownloaded);
+                                pd.setTitle("Completed :)");
+                                pd.setMessage("Downloaded to Storage/Download/Remote Devices/");
+                                objectservice.downloadingfile = false;
+                            }
+                        }
+                );
+                //pd.setCancelable(true);
+                //pd.dismiss();
             }
         };
 

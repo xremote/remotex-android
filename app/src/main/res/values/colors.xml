@@ -10,6 +10,8 @@
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorDanger">#EF6932</color>
 
+    <color name="colorwhite_semi_transparent">#6BF3F1F1</color>
+
     <color name="icons">#FFFFFF</color>
     <color name="divider">#BDBDBD</color>
     <color name="transparent">#00000000</color>

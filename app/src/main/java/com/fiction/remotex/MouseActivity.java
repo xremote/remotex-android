@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -39,9 +40,20 @@ public class MouseActivity extends Activity
         //  actionBar.hide();
         setContentView(R.layout.activity_mouse);
 
+        setMouseControls();
+    }
+
+    @Override
+    protected void onResume() {
         Intent i = new Intent(this,SocketService.class);
         bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
-        setMouseControls();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        unbindService(serviceConnection);
+        super.onPause();
     }
 
     public void setMouseControls(){

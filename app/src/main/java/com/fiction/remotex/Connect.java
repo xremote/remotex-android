@@ -43,6 +43,7 @@ public class Connect extends Activity {
 
     SocketService socketServiceObject;
     boolean isSocketServiceBounded = false;
+    private int backpressed = 0;
     private ArrayList<ClientScanResult> devicesArray;
     private static final String TAG = "zedmessage";
 
@@ -52,11 +53,54 @@ public class Connect extends Activity {
 
         setContentView(R.layout.activity_connect);
         Log.i(TAG, "Exception list1: ");
-        Intent i = new Intent(this, SocketService.class);
-        bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
-
         findConnectedDevices();
         getFileStoragePermission();
+    }
+
+    @Override
+    protected void onResume() {
+
+        Intent i = new Intent(this,SocketService.class);
+        bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
+
+        Log.e(this.getClass().toString(),"resumed");
+        if (socketServiceObject!=null && socketServiceObject.isconnected()) {
+            showMenu();
+        }
+
+        // check after 500ms is device connected....
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (socketServiceObject!=null && socketServiceObject.isconnected()) {
+                    showMenu();
+                }
+                else{
+                    //showMenu();
+                }
+            }
+        }, 10);
+
+
+        super.onResume();
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if(backpressed==0){
+            backpressed+=1;
+            Toast.makeText(Connect.this, "Press Back Again to Exit", Toast.LENGTH_SHORT).show();
+        }else{
+            super.onBackPressed();
+        }
+    }
+
+
+    @Override
+    protected void onPause() {
+        unbindService(serviceConnection);
+        super.onPause();
     }
 
     public void findConnectedDevices() {
@@ -136,11 +180,22 @@ public class Connect extends Activity {
             LayoutInflater layoutInflater = LayoutInflater.from(getContext());
             View view = layoutInflater.inflate(R.layout.ip_list, parent, false);
 
-            String oneItem = getItem(position);
+            String ip_host = getItem(position);
+
+            String Item1 = ip_host.split(":")[1]; // host name
+            String Item2 = ip_host.split(":")[0];
+
+            if(Item1.contains(Item2)){
+                Item1 = "Unknown Host";
+            }
+            Item2+=":";
+
             TextView textView = (TextView) view.findViewById(R.id.text);
+            TextView textView2 = (TextView) view.findViewById(R.id.text2);
             ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
 
-            textView.setText(oneItem);
+            textView.setText(Item1);
+            textView2.setText(Item2);
             return view;
         }
     }
@@ -168,9 +223,42 @@ public class Connect extends Activity {
         else noDeviceLayout.setVisibility(RelativeLayout.GONE);
     }
 
+    public static boolean validIP (String ip) {
+        try {
+            if ( ip == null || ip.isEmpty() ) {
+                return false;
+            }
+
+            String[] parts = ip.split( "\\." );
+            if ( parts.length != 4 ) {
+                return false;
+            }
+
+            for ( String s : parts ) {
+                int i = Integer.parseInt( s );
+                if ( (i < 0) || (i > 255) ) {
+                    return false;
+                }
+            }
+            if ( ip.endsWith(".") ) {
+                return false;
+            }
+
+            return true;
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+    }
+
     public void onConnect(View v) {
+        String ip = ((TextInputEditText) findViewById(R.id.edit_IP)).getText().toString();
+        if(!validIP(ip)){
+            Toast.makeText(this, "Enter Valid IP address", Toast.LENGTH_SHORT).show();
+            return;
+        }
         Toast.makeText(this, "Connecting...", Toast.LENGTH_SHORT).show();
         tryConnect();
+
 
         // check after 500ms is device connected....
         new Handler().postDelayed(new Runnable() {
@@ -202,6 +290,7 @@ public class Connect extends Activity {
 
 
     public void tryConnect() {
+
         if (!socketServiceObject.isservicerunning) {
             Intent socketIntent = new Intent(this, SocketService.class);
             startService(socketIntent);

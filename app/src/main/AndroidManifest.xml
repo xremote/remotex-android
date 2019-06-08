@@ -29,7 +29,9 @@
             android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".SplashScreen"
-            android:theme="@style/AppTheme">
+            android:theme="@style/AppTheme"
+            android:noHistory="true"
+            >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -39,27 +41,35 @@
 
         <service
             android:name=".SocketService"
-            android:exported="false" />
+            android:exported="false"
+            android:stopWithTask="true"/>
 
         <activity
             android:name=".Connect"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+             />
         <activity
             android:name=".MusicplayActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:noHistory="true"/>
         <activity
             android:name=".ExplorerActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:noHistory="true"/>
         <activity
             android:name=".SystemActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:noHistory="true"/>
         <activity
             android:name=".KeyboardActivity"
-            android:screenOrientation="landscape" />
-        <activity android:name=".MouseActivity" />
+            android:screenOrientation="landscape"
+            android:noHistory="true"/>
+        <activity android:name=".MouseActivity"
+            android:noHistory="true"/>
         <activity
             android:name=".ScreenActivity"
-            android:screenOrientation="landscape" />
+            android:screenOrientation="landscape"
+            android:noHistory="true"/>
 
     </application>
 

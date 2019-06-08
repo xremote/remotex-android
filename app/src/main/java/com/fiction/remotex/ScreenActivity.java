@@ -43,8 +43,6 @@ public class ScreenActivity extends Activity {
 
 
         setContentView(R.layout.activity_screen);
-        Intent i = new Intent(this, SocketService.class);
-        bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
         ImageView screen_image = (ImageView) findViewById(R.id.Screen);
         //     help.setText("Ready");
 
@@ -111,9 +109,9 @@ public class ScreenActivity extends Activity {
 
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-                    //  objectservice.sendMessage("!done");
+                    //  socketServiceObject.sendMessage("!done");
                     // specialfunction();
-                    //objectservice.sendMessage("!" + x1 + ";" + y1 + ";" + "5;");
+                    //socketServiceObject.sendMessage("!" + x1 + ";" + y1 + ";" + "5;");
 
                     if(!startenable) {
                         x1 = (int) (event.getX() * maxpixel / screenx);
@@ -136,6 +134,9 @@ public class ScreenActivity extends Activity {
 
     @Override
     protected void onResume() {
+        Intent i = new Intent(this,SocketService.class);
+        bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
+
         super.onResume();
         pause=5;
         startenable=true;
@@ -153,9 +154,11 @@ public class ScreenActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
+        unbindService(serviceConnection);
         pause=-1;
 
     }
+
 
     public void show() {
         if(objectservice.bmpimage!=null) {
