@@ -220,11 +220,12 @@ public class SocketService extends Service {
         int flg=0;
         if(totalbytes>0) {
             int unitpercent = totalbytes / 100;
-            socket.setSoTimeout(2000);
+            //socket.setSoTimeout(2000);
             try {
                 while (recievedl < totalbytes && (length = is.read(buffer, 0, buffer.length)) > 0) {
 
                     if(!downloadingfile && flg==0){
+                        socket.setSoTimeout(500);
                         android.os.SystemClock.sleep(3000);
                         flg=1;
                     }
@@ -352,7 +353,7 @@ public boolean checkasc(String line){
     public boolean isconnected()
     {
         try{
-            if(socket==null || !socket.isConnected() || out == null || out.checkError())
+            if(socket==null || !socket.isConnected())
                 return false;
             else
                 return true;

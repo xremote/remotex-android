@@ -22,6 +22,8 @@ import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.material.button.MaterialButton;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +52,7 @@ public class ExplorerActivity extends Activity
         reset(); //reset path and show default my computer screen
         Log.i(TAG, "created");
 
-        ImageButton reset_b =(ImageButton)findViewById(R.id.Home);
+        MaterialButton reset_b =(MaterialButton)findViewById(R.id.Home);
         reset_b.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -64,12 +66,12 @@ public class ExplorerActivity extends Activity
                     reset();
                 }
 
-                return true;
+                return false;
             }
         });
 
 
-        ImageButton back_b =(ImageButton)findViewById(R.id.Back);
+        MaterialButton back_b =(MaterialButton)findViewById(R.id.Back);
         back_b.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -83,7 +85,7 @@ public class ExplorerActivity extends Activity
                     goback();
                 }
 
-                return true;
+                return false;
             }
         });
 
@@ -99,8 +101,6 @@ public class ExplorerActivity extends Activity
             public void onClick(DialogInterface dialog, int which) {
                 Log.e(this.getClass().toString(),"Close");
                 objectservice.downloadingfile=false;
-                pd.setTitle("Please Wait...");
-                pd.setMessage("Downloading to Storage/Download/Remote Devices/");
 
             }
         });
@@ -316,6 +316,8 @@ public class ExplorerActivity extends Activity
         // Log.i(TAG, "5&2" + path);
         objectservice.sendMessage("&2" + path);
         Log.i(TAG,"send start2");
+        pd.setTitle("Please Wait...");
+        pd.setMessage("Downloading to Storage/Download/Remote Devices/");
         pd.show();
         objectservice.percentdownloaded = 0;
         Log.i(TAG,"send start3");

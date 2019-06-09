@@ -54,7 +54,7 @@ public class Connect extends Activity {
         setContentView(R.layout.activity_connect);
         Log.i(TAG, "Exception list1: ");
         findConnectedDevices();
-        getFileStoragePermission();
+
     }
 
     @Override
@@ -62,13 +62,13 @@ public class Connect extends Activity {
 
         Intent i = new Intent(this,SocketService.class);
         bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
-
+        getFileStoragePermission();
         Log.e(this.getClass().toString(),"resumed");
         if (socketServiceObject!=null && socketServiceObject.isconnected()) {
             showMenu();
         }
 
-        // check after 500ms is device connected....
+        // check after 10ms is device connected....
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -80,7 +80,6 @@ public class Connect extends Activity {
                 }
             }
         }, 10);
-
 
         super.onResume();
     }
@@ -279,7 +278,7 @@ public class Connect extends Activity {
                     }
                 });
             }
-        }, 500);
+        }, 600);
     }
 
 
