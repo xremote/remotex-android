@@ -89,6 +89,8 @@ public class ExplorerActivity extends Activity
             }
         });
 
+        RelativeLayout loading_layout = (RelativeLayout) findViewById(R.id.loading_layout);
+
         pd = new ProgressDialog(ExplorerActivity.this);
         pd.setTitle("Please Wait...");
         pd.setMessage("Downloading to Storage/Download/Remote Devices/");
@@ -101,6 +103,36 @@ public class ExplorerActivity extends Activity
             public void onClick(DialogInterface dialog, int which) {
                 Log.e(this.getClass().toString(),"Close");
                 objectservice.downloadingfile=false;
+
+                if(objectservice.percentdownloaded<100){
+
+                    showloadingscreen();
+
+                    final Thread t = new Thread() {
+                        @Override
+                        public void run() {
+                            try {
+                                android.os.SystemClock.sleep(100);
+                                while(objectservice.cleaning_stream){};
+
+                                runOnUiThread(new Runnable() {
+                                    public void run() {
+                                        hideloadingscreen();
+                                    }
+                                });
+                            }
+
+                            catch (Exception e) {
+                                Log.i(TAG,"; " + e);
+                            }
+                            //pause--;
+                        }
+
+                    };
+
+                    t.start();
+                }
+
 
             }
         });
@@ -196,10 +228,16 @@ public class ExplorerActivity extends Activity
                 new AdapterView.OnItemClickListener() {
                     @Override
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+
+                        RelativeLayout loading_layout = (RelativeLayout) findViewById(R.id.loading_layout);
+                        if (loading_layout.getVisibility() == RelativeLayout.VISIBLE){
+                            return;
+                        }
+
                  String value = (String) listView.getItemAtPosition(i);
 
                         if (parts[i].charAt(0) == '1') {
-
                             path += value + "\\";
                             send(path, i);
                         } else if (parts[i].charAt(0) == '0') {
@@ -231,7 +269,6 @@ public class ExplorerActivity extends Activity
         if(path=="" || path==null || (path.indexOf('\\')==-1))
             reset();
         else{
-
             String temp = path.substring(0,path.lastIndexOf('\\'));
             // Log.i(TAG,"1st "+temp);
             String temp2 = temp.substring(0,temp.lastIndexOf('\\')+1);
@@ -250,9 +287,9 @@ public class ExplorerActivity extends Activity
 
     @Override
     protected void onResume() {
-
         Intent i = new Intent(this,SocketService.class);
         bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
+        hideloadingscreen();
         super.onResume();
     }
 
@@ -270,8 +307,20 @@ public class ExplorerActivity extends Activity
     }
 
 
+    public void showloadingscreen(){
+        RelativeLayout loading_layout = (RelativeLayout) findViewById(R.id.loading_layout);
+        loading_layout.setVisibility(RelativeLayout.VISIBLE);
+    }
+
+
+    public void hideloadingscreen(){
+        RelativeLayout loading_layout = (RelativeLayout) findViewById(R.id.loading_layout);
+        loading_layout.setVisibility(RelativeLayout.GONE);
+    }
+
     public void send(String v,int p) {
 
+        showloadingscreen();
         if(p==-1){
             objectservice.sendMessage("&0" + v);
         }
@@ -290,6 +339,7 @@ public class ExplorerActivity extends Activity
 
                         runOnUiThread(new Runnable() {
                             public void run() {
+                                hideloadingscreen();
                                 listview(updatelist);
                                 Log.i(TAG,"Exception list1: ");
                             }

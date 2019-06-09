@@ -48,6 +48,7 @@ public class SocketService extends Service {
     BufferedReader br;
     private static final String TAG = "zedmessage";
     public boolean downloadingfile = false;
+    public boolean cleaning_stream = false;
 
     private int count = 0;
     @Override
@@ -221,12 +222,13 @@ public class SocketService extends Service {
         if(totalbytes>0) {
             int unitpercent = totalbytes / 100;
             //socket.setSoTimeout(2000);
+            cleaning_stream = true;
             try {
                 while (recievedl < totalbytes && (length = is.read(buffer, 0, buffer.length)) > 0) {
 
                     if(!downloadingfile && flg==0){
+                        android.os.SystemClock.sleep(4000);
                         socket.setSoTimeout(500);
-                        android.os.SystemClock.sleep(3000);
                         flg=1;
                     }
                     myOutput.write(buffer, 0, length);
@@ -241,6 +243,8 @@ public class SocketService extends Service {
             }
 
         }
+
+
         socket.setSoTimeout(0);
         Log.e(this.getClass().toString(),"pd out"+percentdownloaded);
         if(recievedl ==totalbytes){
@@ -252,7 +256,7 @@ public class SocketService extends Service {
             myOutput.flush();
             myOutput.close();
             //   is.close();
-
+        cleaning_stream = false;
     }
 
 
@@ -353,7 +357,7 @@ public boolean checkasc(String line){
     public boolean isconnected()
     {
         try{
-            if(socket==null || !socket.isConnected())
+            if(socket==null || !socket.isConnected() || out==null || out.checkError())
                 return false;
             else
                 return true;
@@ -423,6 +427,7 @@ public boolean checkasc(String line){
                     br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     is = socket.getInputStream();
                     inputreader = new InputStreamReader(socket.getInputStream());
+                    Log.e(this.getClass().toString(),"out ready");
                 }
                 catch (Exception e) {
 

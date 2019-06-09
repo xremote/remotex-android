@@ -50,7 +50,7 @@
                 android:textColor="@color/colorWhite"
                 app:cornerRadius="5dp"
                 app:iconTint="@color/colorWhite"
-                app:strokeColor="@color/colorAccent"
+                app:strokeColor="@color/colorWhite"
                 app:iconGravity="textStart"
                 app:iconSize="25dp"
                 android:layout_marginLeft="7dp"
@@ -66,7 +66,7 @@
                 android:textColor="@color/colorWhite"
                 app:cornerRadius="5dp"
                 app:iconTint="@color/colorWhite"
-                app:strokeColor="@color/colorAccent"
+                app:strokeColor="@color/colorWhite"
                 app:iconGravity="textStart"
                 app:iconSize="25dp"
                 />
@@ -96,6 +96,7 @@
         android:layout_alignParentStart="true" />
 
 
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -123,5 +124,44 @@
 
 
     </RelativeLayout>
+
+
+
+    <!--loading spinner-->
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/card_view_h"
+        android:id="@+id/loading_layout"
+        android:background="@color/colorText"
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <pl.droidsonroids.gif.GifImageView
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:src="@drawable/spinner"
+            android:layout_marginTop="150dp"
+            android:id="@+id/loading_image" />
+
+        <TextView
+            android:id="@+id/ErrorText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_below="@id/loading_image"
+            android:textSize="@dimen/text_size"
+            android:fontFamily="sans-serif-light"
+            android:textColor="@color/colorPrimary"
+            android:layout_centerHorizontal="true"
+            android:layout_marginHorizontal="50dp"
+            android:text="Please Wait..." />
+
+    </RelativeLayout>
+
 
 </RelativeLayout>
