@@ -47,6 +47,8 @@ public class SocketService extends Service {
     InetAddress serverAddr;
     BufferedReader br;
     private static final String TAG = "zedmessage";
+    public boolean downloadingfile = false;
+    public boolean cleaning_stream = false;
 
     private int count = 0;
     @Override
@@ -93,6 +95,7 @@ public class SocketService extends Service {
 
 
     }
+
 
 
 
@@ -161,8 +164,6 @@ public class SocketService extends Service {
         isrecieving=false;   bmpimage = BitmapFactory.decodeFile(outFileName);
             // is.close();
 
-
-
     }
 
 
@@ -173,6 +174,7 @@ public class SocketService extends Service {
             int bytesrecieved = 0;
             int count = 1;
             int totalbytes = 0;
+            downloadingfile = true;
 
             File dir = new File(Environment.getExternalStorageDirectory() + "/Download/Remote Devices/Downloaded");
 
@@ -181,6 +183,7 @@ public class SocketService extends Service {
 
             String outFileName = Environment.getExternalStorageDirectory() + "/Download/Remote Devices/Downloaded/" + savename;
             File myfile = new File(outFileName);
+
 
         try{
 
@@ -215,36 +218,51 @@ public class SocketService extends Service {
             buffer1.order(ByteOrder.LITTLE_ENDIAN);
             totalbytes = (int) buffer1.getLong();
 
-
+        int flg=0;
         if(totalbytes>0) {
             int unitpercent = totalbytes / 100;
-            while (recievedl < totalbytes && (length = is.read(buffer, 0, buffer.length)) > 0) {
+            //socket.setSoTimeout(2000);
+            cleaning_stream = true;
+            try {
+                while (recievedl < totalbytes && (length = is.read(buffer, 0, buffer.length)) > 0) {
 
+                    if(!downloadingfile && flg==0){
+                        android.os.SystemClock.sleep(4000);
+                        socket.setSoTimeout(500);
+                        flg=1;
+                    }
+                    myOutput.write(buffer, 0, length);
 
-                myOutput.write(buffer, 0, length);
-
-                recievedl += length;
-
-                percentdownloaded = (int) (1.0 * recievedl / unitpercent);
+                    recievedl += length;
+                    Log.e(this.getClass().toString(),"pd "+percentdownloaded);
+                    percentdownloaded = (int) (1.0 * recievedl / unitpercent);
+                }
             }
+            catch (Exception e){
+                Log.e(this.getClass().toString(),"error " + e.getMessage());
+            }
+
         }
 
-        percentdownloaded=100;
-            //Close the streams
-            //Toast.makeText(SocketService.this, recievedl + "copied" + totalbytes, Toast.LENGTH_LONG).show();
+
+        socket.setSoTimeout(0);
+        Log.e(this.getClass().toString(),"pd out"+percentdownloaded);
+        if(recievedl ==totalbytes){
+            percentdownloaded=100;
+        }
+
+        downloadingfile = false;
 
             myOutput.flush();
             myOutput.close();
             //   is.close();
-
-
-
+        cleaning_stream = false;
     }
 
 
 
 
-
+public boolean donow = true;
 
     public void sendMessage(final String message){
         check_connection();
@@ -258,7 +276,9 @@ public class SocketService extends Service {
                     //Toast.makeText(SocketService.this,"message",Toast.LENGTH_LONG).show();
                     try {
                         out.println(message);
+
                     } catch (Exception e) {
+                        donow=true;
                         Log.e(TAG,"sendmsg3: "+ e);
                     }
                     out.flush();
@@ -273,21 +293,33 @@ public class SocketService extends Service {
 
     }
 
+public boolean checkasc(String line){
+        for(int i=0;i<line.length();i++){
 
+            if(line.charAt(i)<32 ||  line.charAt(i)>127 )
+                return false;
+        }
+        return true;
+}
 
 
     public String recieveMessage(){
         String line = null;
-
         try{
-            line = br.readLine();
+                line = br.readLine();
+                Log.e(this.getClass().toString(),   donow + " br " + line);
          }
         catch(Exception e){
+            Log.e(this.getClass().toString(), "bre " + line);
          Log.i(TAG,"exe " + e);
             //Toast.makeText(SocketService.this, "exe " + e, Toast.LENGTH_LONG).show();
         }
-      if(line==null)
+      if(line==null){
           line ="nula";
+      }
+//      else if(!checkasc(line)){
+//          line = recieveMessage();
+//      }
            return line;
     }
 
@@ -325,7 +357,7 @@ public class SocketService extends Service {
     public boolean isconnected()
     {
         try{
-            if(socket==null || !socket.isConnected() || out == null || out.checkError())
+            if(socket==null || !socket.isConnected() || out==null || out.checkError())
                 return false;
             else
                 return true;
@@ -334,8 +366,6 @@ public class SocketService extends Service {
             Log.i(TAG,"er "+e);
             return  false;
         }
-
-
     }
 
 
@@ -381,23 +411,23 @@ public class SocketService extends Service {
                catch(Exception e){
 
                    tryhostname=null;
+                   return;
                }
 
-                   InetSocketAddress clAddress = (InetSocketAddress)socket.getLocalSocketAddress();
+                InetSocketAddress clAddress = (InetSocketAddress)socket.getLocalSocketAddress();
                clientname = clAddress.getHostName();
 
                 InetSocketAddress seAddress = (InetSocketAddress)socket.getRemoteSocketAddress();
                 servername = seAddress.getHostName();
 
                 try {
-
-
                     //send the message to the server
                     out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
                     dis =   new DataInputStream(socket.getInputStream());
                     br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
                     is = socket.getInputStream();
                     inputreader = new InputStreamReader(socket.getInputStream());
+                    Log.e(this.getClass().toString(),"out ready");
                 }
                 catch (Exception e) {
 
@@ -417,7 +447,8 @@ public class SocketService extends Service {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+
+        Log.e(this.getClass().toString(),"destroying");
         try {
 
             disconnect();
@@ -428,6 +459,14 @@ public class SocketService extends Service {
             e.printStackTrace();
         }
         socket = null;
+        try{
+            Log.e(this.getClass().toString(),"please die service");
+            android.os.Process.killProcess(android.os.Process.myPid());
+
+        }catch (Exception e){
+
+        }
+        super.onDestroy();
     }
 
 

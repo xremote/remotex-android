@@ -54,6 +54,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.Menu;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import static com.fiction.remotex.MainMenu.Constant.FIRST_COLUMN;
 import static com.fiction.remotex.MainMenu.Constant.SECOND_COLUMN;
@@ -64,7 +65,7 @@ public class MainMenu extends AppCompatActivity
     private static final String TAG = "zedmessage";
     SocketService socketServiceObject;
     boolean isSocketServiceBounded = false;
-
+    private int backpressed=0;
     String sendoutput=null;
     boolean isbound = false;
     int x=0,y=0,x1=0,y1=0,z=9,factor=50;
@@ -78,9 +79,7 @@ public class MainMenu extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
         Log.i(TAG, "Exception list2: ");
-        Intent i = new Intent(this, SocketService.class);
-        bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
-
+        Log.e(this.getClass().toString(),"binded");
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -89,7 +88,13 @@ public class MainMenu extends AppCompatActivity
         seekBar.setOnSeekChangeListener(new OnSeekChangeListener() {
             @Override
             public void onSeeking(SeekParams seekParams) {
-                socketServiceObject.sendMessage("^setvolume;"+seekParams.progress);
+                Log.e(this.getClass().toString(),"Seeked");
+                try{
+                    socketServiceObject.sendMessage("^setvolume;"+seekParams.progress);
+                }catch (Exception e){
+
+                }
+
             }
 
             @Override
@@ -102,6 +107,8 @@ public class MainMenu extends AppCompatActivity
 
             }
         });
+
+
 
 
         Button Left =(Button)findViewById(R.id.Left_Click);
@@ -225,6 +232,7 @@ public class MainMenu extends AppCompatActivity
         }, 100);
     }
 
+
     public void toggle_nav_bar(View V){
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.openDrawer(GravityCompat.START);
@@ -236,8 +244,28 @@ public class MainMenu extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            if(backpressed==0){
+                backpressed+=1;
+                Toast.makeText(MainMenu.this, "Press Back Again to Exit", Toast.LENGTH_SHORT).show();
+            }else{
+                super.onBackPressed();
+            }
         }
+    }
+
+
+    @Override
+    protected void onResume() {
+        Intent i = new Intent(this,SocketService.class);
+        bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        Log.e(this.getClass().toString(),"mainpause");
+        unbindService(serviceConnection);
+        super.onPause();
     }
 
     @Override
@@ -293,10 +321,13 @@ public class MainMenu extends AppCompatActivity
     public void disconnect(View V){
 
         Log.e(this.getClass().toString(),"Disconnecting2");
+
         socketServiceObject.disconnect();
+
+        Toast.makeText(MainMenu.this, "Disconnected", Toast.LENGTH_SHORT).show();
         //Intent i1 = new Intent(this, SocketService.class);
         //stopService(i1);
-        //unbindService(serviceConnection);
+
 
         Intent i = new Intent(this, Connect.class);
         startActivity(i);
@@ -345,6 +376,10 @@ public class MainMenu extends AppCompatActivity
         JSONObject json = new JSONObject(jsonStringInfo);
         String computerName = json.getString("computername");
         String userName =  json.getString("username");
+        int system_vol =   Integer.parseInt(json.getString("volume"));
+
+        IndicatorSeekBar seekBar = (IndicatorSeekBar) findViewById(R.id.vol_slider);
+        seekBar.setProgress(system_vol);
 
         TextView PCname = (TextView) findViewById(R.id.pc_name);
         PCname.setText(computerName + "/" + userName);

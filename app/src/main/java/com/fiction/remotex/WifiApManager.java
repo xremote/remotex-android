@@ -55,7 +55,7 @@ public class WifiApManager {
                         boolean isReachable = InetAddress.getByName(splitted[0]).isReachable(reachableTimeout);
                         Log.e(this.getClass().toString(), splitted[0] + isReachable + InetAddress.getByName(splitted[0]).getCanonicalHostName());
                         if (!onlyReachables || isReachable) {
-                            String ip_hostname = InetAddress.getByName(splitted[0]).getCanonicalHostName();
+                            String ip_hostname = splitted[0] + ":" + InetAddress.getByName(splitted[0]).getCanonicalHostName();
                             result.add(new ClientScanResult(ip_hostname, splitted[3], splitted[5], isReachable));
                         }
                     }
