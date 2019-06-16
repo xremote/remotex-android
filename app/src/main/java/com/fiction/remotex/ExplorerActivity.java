@@ -55,6 +55,7 @@ public class ExplorerActivity extends Activity {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if(!objectservice.cleaning_stream)
                     reset();
                 }
                 return false;
@@ -69,6 +70,7 @@ public class ExplorerActivity extends Activity {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if(!objectservice.cleaning_stream)
                     goback();
                 }
                 return false;
@@ -119,7 +121,7 @@ public class ExplorerActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (objectservice.downloadingfile || pd.isShowing()) {
+        if (objectservice.cleaning_stream || objectservice.downloadingfile || pd.isShowing()) {
             return;
         }
         goback();
@@ -287,7 +289,7 @@ public class ExplorerActivity extends Activity {
                         }
                     });
                 } catch (Exception e) {
-                    Log.e(this.getClass().toString(),e.getMessage());
+                    Log.e(this.getClass().toString(), e.getMessage());
                 }
             }
 
@@ -313,7 +315,7 @@ public class ExplorerActivity extends Activity {
                 try {
                     objectservice.recievefile(filename);
                 } catch (IOException e) {
-                    Log.e(this.getClass().toString(),e.getMessage());
+                    Log.e(this.getClass().toString(), e.getMessage());
                 }
             }
         };
@@ -321,16 +323,18 @@ public class ExplorerActivity extends Activity {
         final Thread update_pd_thread = new Thread() {
             @Override
             public void run() {
-                int progress = 0;
+                int time_elapsed = 0;
                 while (objectservice.percentdownloaded < 100 && objectservice.downloadingfile) {
                     try {
                         pd.setProgress(objectservice.percentdownloaded);
                         sleep(200);
-                        progress += 2;
-                        if (progress > 100 && objectservice.percentdownloaded < 1)
-                            break;
+                        time_elapsed += 2;
+                        if (time_elapsed > 100 && objectservice.percentdownloaded < 1) {
+                            //something is wrong... :(
+                            //break;
+                        }
                     } catch (Exception e) {
-                        Log.e(this.getClass().toString(),e.getMessage());
+                        Log.e(this.getClass().toString(), e.getMessage());
                     }
                 }
                 runOnUiThread(
@@ -338,8 +342,10 @@ public class ExplorerActivity extends Activity {
                             @Override
                             public void run() {
                                 pd.setProgress(objectservice.percentdownloaded);
-                                pd.setTitle("Completed :)");
-                                pd.setMessage("Downloaded to Storage/Download/Remote Devices/");
+                                if (objectservice.percentdownloaded > 99) {
+                                    pd.setTitle("Completed :)");
+                                    pd.setMessage("Downloaded to Storage/Download/Remote Devices/");
+                                }
                                 objectservice.downloadingfile = false;
                             }
                         }

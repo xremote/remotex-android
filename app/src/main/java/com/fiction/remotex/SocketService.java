@@ -171,7 +171,7 @@ public class SocketService extends Service {
 
         //transfer bytes from the inputfile to the outputfile
         byte[] buffer = new byte[1024 * 128];
-
+        cleaning_stream = true;
         input_stream.read(buffer, 0, 8);
         int length;
 
@@ -185,12 +185,12 @@ public class SocketService extends Service {
 
         if (totalbytes > 0) {
             int unitpercent = totalbytes / 100;
-            cleaning_stream = true;
+
             try {
                 while (received_bytes < totalbytes && (length = input_stream.read(buffer, 0, buffer.length)) > 0) {
 
                     if (!downloadingfile && server_timed_out==false) {
-                        // wait until server get times output_writer
+                        // wait until server gets time out output_writer
                         // a guess of 4 secs
                         android.os.SystemClock.sleep(4000);
                         socket.setSoTimeout(500); // stop cleaning stream if there input_stream nothing to read.
@@ -221,7 +221,7 @@ public class SocketService extends Service {
 
 
     public void sendMessage(final String message) {
-        if(!check_connection()){
+        if(!check_connection() || cleaning_stream){
          return;
         }
 
@@ -231,6 +231,7 @@ public class SocketService extends Service {
                 if (output_writer != null && !output_writer.checkError()) {
                     try {
                         output_writer.println(message);
+                        Log.e(this.getClass().toString(),"send message: " + message);
                     } catch (Exception e) {
                         e.printStackTrace();
                         Log.e(this.getClass().toString(),e.getMessage());
@@ -248,6 +249,7 @@ public class SocketService extends Service {
         String msg_line = null;
         try {
             msg_line = buffer_reader.readLine();
+            Log.e(this.getClass().toString(), "recieved message: "+ msg_line);
         } catch (Exception e) {
             e.printStackTrace();
             Log.e(this.getClass().toString(),e.getMessage());
