@@ -415,7 +415,7 @@ public boolean checkasc(String line){
                }
 
                 InetSocketAddress clAddress = (InetSocketAddress)socket.getLocalSocketAddress();
-               clientname = clAddress.getHostName();
+                clientname = clAddress.getHostName();
 
                 InetSocketAddress seAddress = (InetSocketAddress)socket.getRemoteSocketAddress();
                 servername = seAddress.getHostName();

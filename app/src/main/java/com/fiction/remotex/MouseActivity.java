@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -17,35 +16,38 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 
-public class MouseActivity extends Activity
-{
-    String sendoutput=null;
-    SocketService  socketServiceObject;
-    boolean isbound = false;
-    int x=0,y=0,x1=0,y1=0,z=9,factor=50;
-    float sensitivity = (float)2.5;
+public class MouseActivity extends Activity {
+    String mouse_events = null;
+    SocketService socketServiceObject;
+    int new_mouse_x = 0, new_mouse_y = 0, mouse_x = 0, mouse_y = 0, mouse_ops = 9, sensitivity_factor = 50;
+    float mouse_sensitivity = (float) 1.5;
 
-    int xc=0,yc=0;
+    int mouse_down_x = 0, mouse_down_y = 0;
+    // mouse operations or mouse ops
+    private static int LEFT_CLICK_DOWN = 0;
+    private static int LEFT_CLICK_UP = 1;
+    private static int RIGHT_CLICK_DOWN = 2;
+    private static int RIGHT_CLICK_UP = 3;
+    private static int MIDDLE_CLICK_DOWN = 4;
+    private static int MIDDLE_CLICK_UP = 5;
+    private static int LEFT_SINGLE_CLICK = 6;
+    private static int LEFT_DOUBLE_CLICK = 7;
+    private static int DEFAULT_VALUE = 9;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        //ActionBar actionBar = getSupportActionBar();
-
-        //if(actionBar!=null)
-        //  actionBar.hide();
         setContentView(R.layout.activity_mouse);
-
         setMouseControls();
     }
 
     @Override
     protected void onResume() {
-        Intent i = new Intent(this,SocketService.class);
+        Intent i = new Intent(this, SocketService.class);
         bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
         super.onResume();
     }
@@ -56,129 +58,122 @@ public class MouseActivity extends Activity
         super.onPause();
     }
 
-    public void setMouseControls(){
+    public void setMouseControls() {
 
-        Button Left =(Button)findViewById(R.id.Left_Click);
+        Button Left = (Button) findViewById(R.id.Left_Click);
         Left.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
-
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-                    z = 0;
+                    mouse_ops = LEFT_CLICK_DOWN;
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    z = 1;
+                    mouse_ops = LEFT_CLICK_UP;
                 }
-                send1();
+                send_mouse_events();
                 return false;
 
             }
         });
 
 
-        Button Right =(Button)findViewById(R.id.Right_Click);
+        Button Right = (Button) findViewById(R.id.Right_Click);
         Right.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
 
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    z=2;
+                    mouse_ops = RIGHT_CLICK_DOWN;
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    z=3;
+                    mouse_ops = RIGHT_CLICK_UP;
                 }
-                send1();
+                send_mouse_events();
                 return false;
             }
         });
 
 
-        Button Middle =(Button)findViewById(R.id.Middle_Click);
+        Button Middle = (Button) findViewById(R.id.Middle_Click);
         Middle.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
 
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    z=4;
+                    mouse_ops = MIDDLE_CLICK_DOWN;
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    z=5;
+                    mouse_ops = MIDDLE_CLICK_UP;
                 }
-                send1();
+                send_mouse_events();
                 return false;
             }
         });
 
 
-
-        TextView Trackpad =(TextView)findViewById(R.id.TrackPad);
+        TextView Trackpad = (TextView) findViewById(R.id.TrackPad);
         Trackpad.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
 
-                if(!(x1==0 && y1==0)) {
-                    x = (int)event.getX()- x1;
-                    y = (int)event.getY()-y1;
-                    x1=(int)event.getX();
-                    y1=(int)event.getY();
-                    x= x + (int)(x*sensitivity);
-                    y= y + (int)(y*sensitivity);
+                if (!(mouse_x == 0 && mouse_y == 0)) {
+                    new_mouse_x = (int) event.getX() - mouse_x;
+                    new_mouse_y = (int) event.getY() - mouse_y;
+                    mouse_x = (int) event.getX();
+                    mouse_y = (int) event.getY();
+                    new_mouse_x = new_mouse_x + (int) (new_mouse_x * mouse_sensitivity);
+                    new_mouse_y = new_mouse_y + (int) (new_mouse_y * mouse_sensitivity);
 
-                }
-                else{
-                    x1 = (int)event.getX();
-                    y1=(int)event.getY();
-                    x=0; y=0;
+                } else {
+                    mouse_x = (int) event.getX();
+                    mouse_y = (int) event.getY();
+                    new_mouse_x = 0;
+                    new_mouse_y = 0;
 
                 }
 
 
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-                    x1 = (int)event.getX();
-                    y1=(int)event.getY();
-                    x=0; y=0;
+                    mouse_x = (int) event.getX();
+                    mouse_y = (int) event.getY();
+                    new_mouse_x = 0;
+                    new_mouse_y = 0;
 
-                    xc = (int)event.getX();
-                    yc = (int)event.getY();
+                    mouse_down_x = (int) event.getX();
+                    mouse_down_y = (int) event.getY();
 
-                    //sendoutput = "down" + event.getX() + " " + event.getY();
+                    //mouse_events = "down" + event.getX() + " " + event.getY();
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
 
-                    x=0; y=0;                   x1=0; y1=0;
+                    new_mouse_x = 0;
+                    new_mouse_y = 0;
+                    mouse_x = 0;
+                    mouse_y = 0;
 
 
-                    if( Math.abs(xc-(int)event.getX())<2 && Math.abs(yc-(int)event.getY())<2 )
-                    { z=0; send1(); z=1;send1();}
-                    //sendoutput = "Up" + event.getX() + " " + event.getY();
-
+                    if (Math.abs(mouse_down_x - (int) event.getX()) < 2 && Math.abs(mouse_down_y - (int) event.getY()) < 2) {
+                        mouse_ops = LEFT_SINGLE_CLICK;
+                        send_mouse_events();
+                    }
                 }
-
-
-                send1();
+                send_mouse_events();
                 return true;
             }
         });
 
-
-
-        seekbar();
-    }
-
-
-    public void seekbar() {
         SeekBar bar = (SeekBar) findViewById(R.id.Sensitivity);
         bar.setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener() {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                        factor = i;
-                        sensitivity = (float)(((2.4/50)*factor) + 0.1);
+                        sensitivity_factor = i;
+                        mouse_sensitivity = (float) (((2.4 / 50) * sensitivity_factor) + 0.1);
 
                     }
 
@@ -196,20 +191,16 @@ public class MouseActivity extends Activity
     }
 
 
-
-    public void send1()
-    {
-
-        if(!(x==0 && y==0 && z==9)) {
-            sendoutput = x + ";" + y + ";" + z + ";";
-            if (sendoutput != null) {
-                socketServiceObject.sendMessage("*" + sendoutput);
-
+    public void send_mouse_events() {
+        if (!(new_mouse_x == 0 && new_mouse_y == 0 && mouse_ops == 9)) {
+            mouse_events = new_mouse_x + ";" + new_mouse_y + ";" + mouse_ops + ";";
+            if (mouse_events != null) {
+                socketServiceObject.sendMessage("*" + mouse_events);
+                mouse_ops = DEFAULT_VALUE;
             }
         }
 
     }
-
 
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -218,14 +209,12 @@ public class MouseActivity extends Activity
 
             SocketService.LocalBinder binder = (SocketService.LocalBinder) iBinder;
             socketServiceObject = binder.getService();
-            isbound=true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
-
             socketServiceObject = null;
-            isbound = false;
+
         }
     };
 }

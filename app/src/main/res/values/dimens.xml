@@ -1,13 +1,38 @@
 <resources>
-    <dimen name="fab_margin">16dp</dimen>
     <!-- Default screen margins, per the Android Design guidelines. -->
     <dimen name="activity_horizontal_margin">16dp</dimen>
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="nav_header_vertical_spacing">8dp</dimen>
     <dimen name="nav_header_height">176dp</dimen>
+
     <dimen name="text_size_sm">10sp</dimen>
-    <dimen name="text_size">13sp</dimen>
+    <dimen name="text_size_md">13sp</dimen>
     <dimen name="text_size_lg">15sp</dimen>
     <dimen name="text_size_xl">20sp</dimen>
+    <dimen name="text_size_xxl">40sp</dimen>
 
+    <dimen name="elevation_xs">3dp</dimen>
+    <dimen name="elevation_sm">6dp</dimen>
+    <dimen name="elevation_md">12dp</dimen>
+    <dimen name="elevation_lg">24dp</dimen>
+
+    <dimen name="corner_radius_xs">3dp</dimen>
+    <dimen name="corner_radius_sm">6dp</dimen>
+    <dimen name="corner_radius_md">12dp</dimen>
+    <dimen name="corner_radius_lg">24dp</dimen>
+
+    <dimen name="margin_xs">2dp</dimen>
+    <dimen name="margin_sm">4dp</dimen>
+    <dimen name="margin_md">8dp</dimen>
+    <dimen name="margin_lg">16dp</dimen>
+    <dimen name="margin_xl">20dp</dimen>
+
+
+    <dimen name="image_xs">5dp</dimen>
+    <dimen name="image_sm">10dp</dimen>
+    <dimen name="image_md">18dp</dimen>
+    <dimen name="image_lg">30dp</dimen>
+    <dimen name="image_xl">50dp</dimen>
+    <dimen name="image_halfw">200dp</dimen>
+    <dimen name="image_fullw">300dp</dimen>
 </resources>

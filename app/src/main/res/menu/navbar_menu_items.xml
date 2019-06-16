@@ -10,11 +10,11 @@
             android:title="Screen Sharing" />
         <item
             android:id="@+id/nav_mouse"
-            android:icon="@drawable/mouse1_min2"
+            android:icon="@drawable/mouse_min"
             android:title="Mouse" />
         <item
             android:id="@+id/nav_keyboard"
-            android:icon="@drawable/keyboard_nav_min2"
+            android:icon="@drawable/keyboard_nav_min"
             android:title="Keyboard" />
         <item
             android:id="@+id/nav_explorer"

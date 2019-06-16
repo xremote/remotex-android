@@ -10,56 +10,46 @@
 
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/card_view_bg"
+        android:id="@+id/card_head_bg"
         android:layout_width="match_parent"
         android:layout_height="20dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="false"
-        app:cardCornerRadius="0dp"
-        android:layout_gravity="center"
         app:cardBackgroundColor="@color/colorPrimaryDark">
+
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/card_view_h"
+        android:id="@+id/card_head"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentBottom="false"
-        android:layout_gravity="center"
-        android:elevation="10dp"
+        android:elevation="@dimen/elevation_md"
         app:cardBackgroundColor="@color/colorPrimaryDark"
-        app:cardCornerRadius="5dp"
-        app:cardElevation="6dp"
-        app:cardMaxElevation="15dp"
+        app:cardCornerRadius="@dimen/corner_radius_sm"
+        app:cardElevation="@dimen/elevation_sm"
         app:cardPreventCornerOverlap="true">
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-
             <LinearLayout
-                android:id="@+id/Head_Layout"
+                android:id="@+id/Heading_Layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_marginVertical="10dp">
+                android:layout_marginVertical="@dimen/margin_md">
 
                 <TextView
-                    android:id="@+id/Connect"
+                    android:id="@+id/Heading_Text"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:fontFamily="sans-serif-light"
-                    android:text="  Connect To PC"
+                    android:text="Connect To PC"
                     android:textColor="@color/colorText"
-                    android:textSize="33sp" />
+                    android:textSize="@dimen/text_size_xl" />
 
             </LinearLayout>
 
@@ -68,39 +58,35 @@
                 android:id="@+id/Refresh_Layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/Heading_Layout"
                 android:layout_centerInParent="true"
                 android:layout_centerHorizontal="true"
-                android:orientation="horizontal"
-                android:layout_below="@id/Head_Layout"
-                >
+                android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/info_button"
+                    android:id="@+id/how_button"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:onClick="showhelp_onclick"
                     android:text="How it Works?"
-                    android:layout_marginRight="10dp"
                     android:textColor="@color/colorText"
-                    app:cornerRadius="5dp"
-                    app:strokeColor="@color/colorAccent"
-                    android:textSize="@dimen/text_size"
-                    android:onClick="showhelp"
-                    />
-
+                    android:textSize="@dimen/text_size_md"
+                    app:cornerRadius="@dimen/corner_radius_sm"
+                    app:strokeColor="@color/colorAccent" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/Refresh_b"
                     style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/margin_sm"
+                    android:onClick="Refreshlist_onclick"
                     android:text="Refresh"
                     android:textColor="@color/colorText"
-                    app:cornerRadius="5dp"
-                    android:textSize="@dimen/text_size"
-                    app:strokeColor="@color/colorAccent"
-                    android:onClick="Refreshlist"
-                    />
+                    android:textSize="@dimen/text_size_md"
+                    app:cornerRadius="@dimen/corner_radius_sm"
+                    app:strokeColor="@color/colorAccent" />
 
             </LinearLayout>
 
@@ -108,52 +94,47 @@
                 android:id="@+id/connect_layout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_centerHorizontal="true"
                 android:layout_below="@id/Refresh_Layout"
-                android:layout_marginBottom="20dp"
-                >
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="@dimen/margin_lg"
+                android:orientation="horizontal">
 
                 <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="200dp"
                     android:layout_height="wrap_content"
-                    android:hint="Enter I.P Address"
 
-                    android:textColorHint="@color/colorText"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    android:hint="Enter I.P Address"
+                    android:textColorHint="@color/colorgrey"
                     app:boxBackgroundColor="@color/transparent"
-                    android:layout_marginRight="15dp"
-                    app:boxStrokeColor="@color/colorAccent"
-                    app:boxCornerRadiusTopStart="10dp"
-                    app:boxCornerRadiusTopEnd="10dp"
-                    app:boxCornerRadiusBottomStart="10dp"
-                    app:boxCornerRadiusBottomEnd="10dp"
-                    >
+                    app:boxCornerRadiusBottomEnd="@dimen/corner_radius_md"
+                    app:boxCornerRadiusBottomStart="@dimen/corner_radius_md"
+                    app:boxCornerRadiusTopEnd="@dimen/corner_radius_md"
+                    app:boxCornerRadiusTopStart="@dimen/corner_radius_md"
+                    app:boxStrokeColor="@color/colorAccent">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/edit_IP"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="date"
-                        android:textSize="@dimen/text_size"
                         android:textColor="@color/colorAccent"
-                        android:text="192.168.43.252"
-                        />
+                        android:textSize="@dimen/text_size_md" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/connect_button"
                     style="@style/Widget.MaterialComponents.Button"
-                    android:layout_marginTop="10dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginLeft="@dimen/margin_md"
+                    android:layout_marginTop="10dp"
+                    android:onClick="Connect_onclick"
                     android:text="Connect"
-                    app:cornerRadius="5dp"
-                    android:textSize="@dimen/text_size"
                     android:textColor="@color/colorText"
-                    android:onClick="onConnect"
-                    />
+                    android:textSize="@dimen/text_size_md"
+                    app:cornerRadius="@dimen/corner_radius_sm" />
 
             </LinearLayout>
 
@@ -163,56 +144,52 @@
     </androidx.cardview.widget.CardView>
 
     <RelativeLayout
+        android:id="@+id/notfound_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/card_view_h"
-        android:id="@+id/notfound_layout">
+        android:layout_below="@id/card_head">
 
         <pl.droidsonroids.gif.GifImageView
+            android:id="@+id/notfound_gif"
             android:layout_width="match_parent"
             android:layout_height="200dp"
-            android:src="@drawable/confused_robot"
-            android:layout_marginTop="25dp"
-            android:id="@+id/notfound_image" />
+            android:layout_marginTop="@dimen/margin_xl"
+            android:src="@drawable/confused_robot" />
 
         <TextView
-            android:id="@+id/ErrorText"
+            android:id="@+id/ErrorHead"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_below="@id/notfound_image"
-            android:textSize="30sp"
+            android:layout_below="@id/notfound_gif"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/margin_md"
             android:fontFamily="sans-serif-light"
+            android:text="No Device Found"
             android:textColor="@color/colorAccent"
-            android:layout_centerHorizontal="true"
-            android:layout_marginHorizontal="50dp"
-            android:text="No Device Found" />
+            android:textSize="@dimen/text_size_xl" />
 
         <TextView
-            android:id="@+id/Help_text"
+            android:id="@+id/LoadingText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@id/ErrorText"
-            android:layout_marginTop="5sp"
-            android:textSize="20sp"
-            android:layout_marginHorizontal="40dp"
-            android:fontFamily="sans-serif-light"
-            android:textColor="@color/colorPrimary"
-            android:textAlignment="center"
+            android:layout_below="@id/ErrorHead"
             android:layout_centerHorizontal="true"
-            android:text="Make sure your PC and Phone are on same Network." />
-
+            android:layout_marginTop="@dimen/margin_md"
+            android:fontFamily="sans-serif-light"
+            android:text="Make sure your PC and Phone are on same Network."
+            android:textAlignment="center"
+            android:textColor="@color/colorTextTransparent"
+            android:textSize="@dimen/text_size_xl" />
 
     </RelativeLayout>
 
     <ListView
-        android:id="@+id/listView"
+        android:id="@+id/DeviceList"
         android:layout_width="fill_parent"
         android:layout_height="600px"
-        android:layout_below="@id/card_view_h"
+        android:layout_below="@id/card_head"
         android:layout_centerHorizontal="true"
-        android:layout_marginLeft="25dp"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="50dp" />
+        android:layout_marginHorizontal="@dimen/margin_lg"
+        android:layout_marginTop="@dimen/margin_lg" />
 
 </RelativeLayout>

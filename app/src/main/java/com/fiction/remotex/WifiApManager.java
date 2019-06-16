@@ -19,9 +19,9 @@ public class WifiApManager {
     }
 
 
-
     /**
      * Gets a list of the clients connected to the Hotspot, reachable timeout is 300
+     *
      * @param onlyReachables {@code false} if the list should contain unreachable (probably disconnected) clients, {@code true} otherwise
      * @return ArrayList of {@link ClientScanResult}
      */
@@ -31,7 +31,8 @@ public class WifiApManager {
 
     /**
      * Gets a list of the clients connected to the Hotspot
-     * @param onlyReachables {@code false} if the list should contain unreachable (probably disconnected) clients, {@code true} otherwise
+     *
+     * @param onlyReachables   {@code false} if the list should contain unreachable (probably disconnected) clients, {@code true} otherwise
      * @param reachableTimeout Reachable Timout in miliseconds
      * @return ArrayList of {@link ClientScanResult}
      */
@@ -49,11 +50,8 @@ public class WifiApManager {
                 if ((splitted != null) && (splitted.length >= 4)) {
                     // Basic sanity check
                     String mac = splitted[3];
-                    //InetAddress.getByName(splitted[0]);
-                    Log.e(this.getClass().toString(), splitted[0]);
                     if (mac.matches("..:..:..:..:..:..")) {
                         boolean isReachable = InetAddress.getByName(splitted[0]).isReachable(reachableTimeout);
-                        Log.e(this.getClass().toString(), splitted[0] + isReachable + InetAddress.getByName(splitted[0]).getCanonicalHostName());
                         if (!onlyReachables || isReachable) {
                             String ip_hostname = splitted[0] + ":" + InetAddress.getByName(splitted[0]).getCanonicalHostName();
                             result.add(new ClientScanResult(ip_hostname, splitted[3], splitted[5], isReachable));
