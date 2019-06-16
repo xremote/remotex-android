@@ -20,7 +20,7 @@ public class WifiApManager {
 
 
     /**
-     * Gets a list of the clients connected to the Hotspot, reachable timeout is 300
+     * Gets a list of the clients connected to the Hotspot, reachable timeout input_stream 300
      *
      * @param onlyReachables {@code false} if the list should contain unreachable (probably disconnected) clients, {@code true} otherwise
      * @return ArrayList of {@link ClientScanResult}

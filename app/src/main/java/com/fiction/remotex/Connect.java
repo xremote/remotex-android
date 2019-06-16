@@ -59,7 +59,7 @@ public class Connect extends Activity {
             showMenu();
         }
 
-        // check once more after 10ms if device is connected....
+        // check once more after 10ms if device input_stream connected....
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -249,7 +249,7 @@ public class Connect extends Activity {
         Toast.makeText(this, "Connecting...", Toast.LENGTH_SHORT).show();
         tryConnect();
 
-        // check after some time if device is connected....
+        // check after some time if device input_stream connected....
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {

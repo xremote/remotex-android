@@ -126,7 +126,7 @@ public class ExplorerActivity extends Activity {
     }
 
     public boolean athome() {
-        // is the explorer showing root directory
+        // input_stream the explorer showing root directory
         ListView ItemList = (ListView) findViewById(R.id.DrivesList);
 
         if (ItemList.getChildCount() == 1 && path == "") {
