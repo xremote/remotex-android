@@ -161,18 +161,18 @@ public class SocketService extends Service {
             Log.e(this.getClass().toString(),e.getMessage());
         }
 
+        byte[] buffer = new byte[1024 * 128];
         FileOutputStream output_stream = new FileOutputStream(output_file, false);
         try {
             output_stream = new FileOutputStream(output_filename);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            cleaning_stream = true;
+            input_stream.read(buffer, 0, 8);
+        } catch (Exception e) {
             Log.e(this.getClass().toString(),e.getMessage());
         }
 
         //transfer bytes from the inputfile to the outputfile
-        byte[] buffer = new byte[1024 * 128];
-        cleaning_stream = true;
-        input_stream.read(buffer, 0, 8);
+
         int length;
 
         int received_bytes = 0;
@@ -180,6 +180,12 @@ public class SocketService extends Service {
         ByteBuffer tmp_buffer = ByteBuffer.wrap(buffer); // temp buffer to change order to little endian
         tmp_buffer.order(ByteOrder.LITTLE_ENDIAN);
         totalbytes = (int) tmp_buffer.getLong();
+
+        if(totalbytes==-1){
+            socket.setSoTimeout(500);
+            //server stopped sending file.. or was not able to send.
+        }
+
 
         boolean server_timed_out = false; // did server stop sending because of time output_writer
 
@@ -192,8 +198,7 @@ public class SocketService extends Service {
                     if (!downloadingfile && server_timed_out==false) {
                         // wait until server gets time out output_writer
                         // a guess of 4 secs
-                        android.os.SystemClock.sleep(4000);
-                        socket.setSoTimeout(500); // stop cleaning stream if there input_stream nothing to read.
+                        socket.setSoTimeout(500); // stop cleaning stream if there is nothing to read.
                         server_timed_out = true;
                     }
                     output_stream.write(buffer, 0, length);
@@ -201,11 +206,12 @@ public class SocketService extends Service {
                     percentdownloaded = (int) (1.0 * received_bytes / unitpercent);
                 }
             } catch (Exception e) {
+                Log.e(this.getClass().toString(),e.getMessage() + "waht ");
                 e.printStackTrace();
-                Log.e(this.getClass().toString(),e.getMessage());
+
             }
         }
-
+        Log.e(this.getClass().toString(),"cleaning");
         socket.setSoTimeout(0); // set back to infinite
         if (received_bytes == totalbytes) {
             percentdownloaded = 100;
@@ -219,9 +225,8 @@ public class SocketService extends Service {
         cleaning_stream = false;
     }
 
-
     public void sendMessage(final String message) {
-        if(!check_connection() || cleaning_stream){
+        if( !message.equals("syncback") && (!check_connection() || cleaning_stream)){
          return;
         }
 

@@ -65,9 +65,16 @@ public class MainMenu extends AppCompatActivity
             @Override
             public void run() {
                 // get info about pc after some time
-                getSystemInfo();
+                if(socketServiceObject==null){
+                    disconnect();
+                }
+                else{
+                    getSystemInfo();
+                }
+
+
             }
-        }, 100);
+        }, 200);
     }
 
 
@@ -222,6 +229,7 @@ public class MainMenu extends AppCompatActivity
     protected void onResume() {
         Intent i = new Intent(this, SocketService.class);
         bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
+
         super.onResume();
     }
 
@@ -258,8 +266,14 @@ public class MainMenu extends AppCompatActivity
         return true;
     }
 
-    public void disconnect(View V) {
-        socketServiceObject.disconnect();
+    public void disconnect_button(View V) {
+        disconnect();
+    }
+
+    public void disconnect(){
+        if(socketServiceObject!=null)
+            socketServiceObject.disconnect();
+
         Toast.makeText(MainMenu.this, "Disconnected", Toast.LENGTH_SHORT).show();
         Intent i = new Intent(this, Connect.class);
         startActivity(i);

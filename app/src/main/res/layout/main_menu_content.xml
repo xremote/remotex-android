@@ -71,7 +71,7 @@
                     android:layout_centerHorizontal="true"
                     android:layout_marginTop="@dimen/margin_md"
                     android:layout_marginBottom="@dimen/margin_md"
-                    android:onClick="disconnect"
+                    android:onClick="disconnect_button"
                     android:text="Disconnect"
                     android:textColor="@color/colorText"
                     android:theme="@style/AppTheme_Danger"

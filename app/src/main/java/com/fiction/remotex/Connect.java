@@ -42,6 +42,7 @@ public class Connect extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connect);
+        getFileStoragePermission();
         findConnectedDevices();
     }
 
@@ -52,8 +53,6 @@ public class Connect extends Activity {
         Intent i = new Intent(this, SocketService.class);
         bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
 
-        getFileStoragePermission();
-
         if (socketServiceObject != null && socketServiceObject.isconnected()) {
             // if already connected
             showMenu();
@@ -63,6 +62,7 @@ public class Connect extends Activity {
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
+
                 if (socketServiceObject != null && socketServiceObject.isconnected()) {
                     showMenu();
                 } else {
@@ -70,7 +70,6 @@ public class Connect extends Activity {
                 }
             }
         }, 10);
-
         super.onResume();
     }
 
@@ -112,10 +111,10 @@ public class Connect extends Activity {
                         try {
 
                             if (DevicesList.size() > 0) {
-                                NoDeviceError(false);
+                                ShowNoDeviceError(false);
                                 showDevicesList();
                             } else {
-                                NoDeviceError(true); // show "no device error"
+                                ShowNoDeviceError(true); // show "no device error"
                                 showDevicesList();
                             }
                         } catch (Exception e) {
@@ -195,7 +194,6 @@ public class Connect extends Activity {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         }
-
         // create download folder if not present
         File dir = new File(Environment.getExternalStorageDirectory() + "/Download/Remote Devices");
         if (!dir.exists())
@@ -207,7 +205,7 @@ public class Connect extends Activity {
         findConnectedDevices();
     }
 
-    public void NoDeviceError(boolean noDeviceFound) {
+    public void ShowNoDeviceError(boolean noDeviceFound) {
         RelativeLayout noDeviceLayout = (RelativeLayout) findViewById(R.id.notfound_layout);
         if (noDeviceFound) noDeviceLayout.setVisibility(RelativeLayout.VISIBLE);
         else noDeviceLayout.setVisibility(RelativeLayout.GONE);

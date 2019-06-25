@@ -10,7 +10,7 @@ import android.widget.TextView;
 
 public class SplashScreen extends Activity {
 
-    private final int SPLASH_DISPLAY_TIME = 700;
+    private final int SPLASH_DISPLAY_TIME = 1000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.material.button.MaterialButton;
 
@@ -34,7 +35,7 @@ public class ExplorerActivity extends Activity {
     Integer items_imagesArray[];
     public static String[] drives_list;
     public static String path = "";
-    SocketService objectservice;
+    SocketService socketServiceObject;
     public ProgressDialog pd;
 
     @Override
@@ -55,7 +56,7 @@ public class ExplorerActivity extends Activity {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    if(!objectservice.cleaning_stream)
+                    if(!socketServiceObject.cleaning_stream)
                     reset();
                 }
                 return false;
@@ -70,7 +71,7 @@ public class ExplorerActivity extends Activity {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    if(!objectservice.cleaning_stream)
+                    if(!socketServiceObject.cleaning_stream)
                     goback();
                 }
                 return false;
@@ -89,15 +90,16 @@ public class ExplorerActivity extends Activity {
         pd.setButton(DialogInterface.BUTTON_NEGATIVE, "Close", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                objectservice.downloadingfile = false;
-                if (objectservice.percentdownloaded < 100) {
+                socketServiceObject.downloadingfile = false;
+                if (socketServiceObject.percentdownloaded < 100) {
                     showloadingscreen();
+                    socketServiceObject.sendMessage("syncback");
                     final Thread t = new Thread() {
                         @Override
                         public void run() {
                             try {
-                                android.os.SystemClock.sleep(100);
-                                while (objectservice.cleaning_stream) {
+                                android.os.SystemClock.sleep(500);
+                                while (socketServiceObject.cleaning_stream) {
                                     // undetermined waiting for file network stream to get cleared
                                 }
                                 runOnUiThread(new Runnable() {
@@ -121,7 +123,7 @@ public class ExplorerActivity extends Activity {
 
     @Override
     public void onBackPressed() {
-        if (objectservice.cleaning_stream || objectservice.downloadingfile || pd.isShowing()) {
+        if (socketServiceObject.cleaning_stream || socketServiceObject.downloadingfile || pd.isShowing()) {
             return;
         }
         goback();
@@ -179,6 +181,11 @@ public class ExplorerActivity extends Activity {
             empty_folder_view.setVisibility(RelativeLayout.VISIBLE);
             return;
         }
+
+        if(garbage_date_recieved(recieved_msg)){
+            disconnect();
+            return;
+        }
         split_drives(recieved_msg);
         ArrayAdapter<String> adapter = new CustomAdapter(this, items_nameArray, items_imagesArray);
         Drives_list_view.setAdapter(adapter);
@@ -200,13 +207,20 @@ public class ExplorerActivity extends Activity {
                         } else if (drives_list[i].charAt(0) == '0') {
                             send("My Computer", -1);
                         } else if (drives_list[i].charAt(0) == '2') {
-                            sendfile(value, path + value);
+                            receivefile(value, path + value);
                         }
                     }
                 }
         );
     }
 
+    public Boolean garbage_date_recieved(String msg){
+        // if msg does not start with 0,1 or 2 disconnect
+        if(msg.charAt(0)=='0' || msg.charAt(0)=='1' || msg.charAt(0)=='2'){
+            return false;
+        }
+        return true;
+    }
 
     public void goback() {
 
@@ -245,8 +259,10 @@ public class ExplorerActivity extends Activity {
 
     @Override
     protected void onPause() {
-        objectservice.downloadingfile = false;
+        socketServiceObject.downloadingfile = false;
+        socketServiceObject.sendMessage("syncback");
         unbindService(serviceConnection);
+        pd.dismiss();
         super.onPause();
     }
 
@@ -270,17 +286,17 @@ public class ExplorerActivity extends Activity {
     public void send(String v, int p) {
         showloadingscreen();
         if (p == -1) {
-            objectservice.sendMessage("&0" + v);
+            socketServiceObject.sendMessage("&0" + v);
         } else {
             //Toast.makeText(Explorer.this, drives_list[p] + v, Toast.LENGTH_LONG).show();
-            objectservice.sendMessage("&1" + v);
+            socketServiceObject.sendMessage("&1" + v);
         }
 
         final Thread t = new Thread() {
             @Override
             public void run() {
                 try {
-                    final String recieved_message = objectservice.recieveMessage();
+                    final String recieved_message = socketServiceObject.recieveMessage();
 
                     runOnUiThread(new Runnable() {
                         public void run() {
@@ -297,23 +313,23 @@ public class ExplorerActivity extends Activity {
         t.start();
     }
 
-    public void sendfile(final String filename, String path) {
-        objectservice.sendMessage("&2" + path);
+    public void receivefile(final String filename, String path) {
+        socketServiceObject.sendMessage("&2" + path);
         pd.setTitle("Please Wait...");
         pd.setMessage("Downloading to Storage/Download/Remote Devices/");
         pd.show();
-        objectservice.percentdownloaded = 0;
+        socketServiceObject.percentdownloaded = 0;
 
-        pd.setProgress(objectservice.percentdownloaded);
+        pd.setProgress(socketServiceObject.percentdownloaded);
         pd.setCancelable(false);
 
 
-        objectservice.downloadingfile = true;
-        final Thread send_file_path_thread = new Thread() {
+        socketServiceObject.downloadingfile = true;
+        final Thread recieve_file_thread = new Thread() {
             @Override
             public void run() {
                 try {
-                    objectservice.recievefile(filename);
+                    socketServiceObject.recievefile(filename);
                 } catch (IOException e) {
                     Log.e(this.getClass().toString(), e.getMessage());
                 }
@@ -324,12 +340,12 @@ public class ExplorerActivity extends Activity {
             @Override
             public void run() {
                 int time_elapsed = 0;
-                while (objectservice.percentdownloaded < 100 && objectservice.downloadingfile) {
+                while (socketServiceObject.percentdownloaded < 100 && socketServiceObject.downloadingfile) {
                     try {
-                        pd.setProgress(objectservice.percentdownloaded);
+                        pd.setProgress(socketServiceObject.percentdownloaded);
                         sleep(200);
                         time_elapsed += 2;
-                        if (time_elapsed > 100 && objectservice.percentdownloaded < 1) {
+                        if (time_elapsed > 100 && socketServiceObject.percentdownloaded < 1) {
                             //something is wrong... :(
                             //break;
                         }
@@ -341,19 +357,19 @@ public class ExplorerActivity extends Activity {
                         new Runnable() {
                             @Override
                             public void run() {
-                                pd.setProgress(objectservice.percentdownloaded);
-                                if (objectservice.percentdownloaded > 99) {
+                                pd.setProgress(socketServiceObject.percentdownloaded);
+                                if (socketServiceObject.percentdownloaded > 99) {
                                     pd.setTitle("Completed :)");
                                     pd.setMessage("Downloaded to Storage/Download/Remote Devices/");
                                 }
-                                objectservice.downloadingfile = false;
+                                socketServiceObject.downloadingfile = false;
                             }
                         }
                 );
             }
         };
 
-        send_file_path_thread.start();
+        recieve_file_thread.start();
         update_pd_thread.start();
     }
 
@@ -382,19 +398,28 @@ public class ExplorerActivity extends Activity {
         }
     }
 
+    public void disconnect(){
+        if(socketServiceObject!=null)
+            socketServiceObject.disconnect();
+
+        Toast.makeText(this, "Disconnected", Toast.LENGTH_SHORT).show();
+        Intent i = new Intent(this, Connect.class);
+        startActivity(i);
+        this.finish();
+    }
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
 
             SocketService.LocalBinder binder = (SocketService.LocalBinder) iBinder;
-            objectservice = binder.getService();
+            socketServiceObject = binder.getService();
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
 
-            objectservice = null;
+            socketServiceObject = null;
         }
     };
 }
