@@ -41,7 +41,7 @@ public class SocketService extends Service {
     public boolean downloadingfile = false;
     public boolean cleaning_stream = false;
     private int heartbeat_count = 0;
-
+    public String Password = "fiction";
 
     //not used as of now
     public String GetServerName() {
@@ -78,7 +78,7 @@ public class SocketService extends Service {
             @Override
             public void run() {
                 while (true) {
-                    Log.e(this.getClass().toString(), heartbeat_count + "");
+                    Log.e(this.getClass().toString(), heartbeat_count + " " + isconnected());
                     heartbeat_count++;
                     android.os.SystemClock.sleep(2000);
                 }
@@ -117,7 +117,7 @@ public class SocketService extends Service {
         //transfer bytes from the inputfile to the outputfile
         int totalbytes = 0;
         byte[] buffer = new byte[1024 * 8];
-        input_stream.read(buffer, 0, 8);
+        crypt_inputread(buffer, 0, 8);
         int length;
         int received_bytes = 0;
 
@@ -126,7 +126,7 @@ public class SocketService extends Service {
         totalbytes = (int) tmp_buffer.getLong();
 
 
-        while (received_bytes < totalbytes && (length = input_stream.read(buffer, 0, buffer.length)) > 0) {
+        while (received_bytes < totalbytes && (length = crypt_inputread(buffer, 0, buffer.length)) > 0) {
             output_stream.write(buffer, 0, length);
             received_bytes += length;
         }
@@ -166,7 +166,7 @@ public class SocketService extends Service {
         try {
             output_stream = new FileOutputStream(output_filename);
             cleaning_stream = true;
-            input_stream.read(buffer, 0, 8);
+            crypt_inputread(buffer, 0, 8);
         } catch (Exception e) {
             Log.e(this.getClass().toString(),e.getMessage());
         }
@@ -193,7 +193,7 @@ public class SocketService extends Service {
             int unitpercent = totalbytes / 100;
 
             try {
-                while (received_bytes < totalbytes && (length = input_stream.read(buffer, 0, buffer.length)) > 0) {
+                while (received_bytes < totalbytes && (length = crypt_inputread(buffer, 0, buffer.length)) > 0) {
 
                     if (!downloadingfile && server_timed_out==false) {
                         // wait until server gets time out output_writer
@@ -235,8 +235,7 @@ public class SocketService extends Service {
             public void run() {
                 if (output_writer != null && !output_writer.checkError()) {
                     try {
-                        output_writer.println(message);
-                        Log.e(this.getClass().toString(),"send message: " + message);
+                        crypt_sendmsg(message);
                     } catch (Exception e) {
                         e.printStackTrace();
                         Log.e(this.getClass().toString(),e.getMessage());
@@ -251,15 +250,7 @@ public class SocketService extends Service {
     }
 
     public String recieveMessage() {
-        String msg_line = null;
-        try {
-            msg_line = buffer_reader.readLine();
-            Log.e(this.getClass().toString(), "recieved message: "+ msg_line);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Log.e(this.getClass().toString(),e.getMessage());
-        }
-        return msg_line;
+        return crypt_receivemsg();
     }
 
     public boolean check_connection() {
@@ -365,6 +356,41 @@ public class SocketService extends Service {
             }
         }
     }
+
+//    final send messages wrapper
+
+    public void crypt_sendmsg(String msg){
+        Log.e("sentmessage ", msg);
+        String Encrypted_msg =  Encryption.encrypt(msg,Password);
+        Log.e("sentcryptmessage ", Encrypted_msg);
+        output_writer.println(Encrypted_msg);
+    }
+
+
+
+    public String crypt_receivemsg(){
+        String Decrypted_msg = null;
+        try {
+            String msg = buffer_reader.readLine();
+            Log.e("recievedmessage ", msg);
+            Decrypted_msg =  Encryption.decrypt(msg,Password);
+            Log.e("rec_decdmessage ", Decrypted_msg);
+        }catch (Exception e){
+
+        }
+        return Decrypted_msg;
+    }
+
+    public int crypt_inputread(byte[] buffer, int offset, int length) throws IOException{
+        int len=0;
+        try {
+            len = input_stream.read(buffer, offset, length);
+        }catch (Exception e){
+            throw e;
+        }
+        return len;
+    }
+
 
 
     @Override

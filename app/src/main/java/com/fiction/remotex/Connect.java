@@ -56,6 +56,7 @@ public class Connect extends Activity {
         if (socketServiceObject != null && socketServiceObject.isconnected()) {
             // if already connected
             showMenu();
+            Log.e("conn1 ", "Not connected" );
         }
 
         // check once more after 10ms if device input_stream connected....
@@ -65,11 +66,13 @@ public class Connect extends Activity {
 
                 if (socketServiceObject != null && socketServiceObject.isconnected()) {
                     showMenu();
+                    Log.e("conn2 ", "Not connected" );
                 } else {
+                    Log.e("conn1 ", "Nots connected" );
                     //do nothing
                 }
             }
-        }, 10);
+        }, 2000);
         super.onResume();
     }
 
@@ -254,6 +257,7 @@ public class Connect extends Activity {
                 if (socketServiceObject.isconnected()) {
                     showMenu();
                 } else {
+                    Log.e("conn ", "Not connected" );
                     //showMenu();
                 }
                 runOnUiThread(new Runnable() {
@@ -265,7 +269,7 @@ public class Connect extends Activity {
                     }
                 });
             }
-        }, 600);
+        }, 2000);
     }
 
 
