@@ -378,6 +378,7 @@ public class SocketService extends Service {
         }catch (Exception e){
 
         }
+        
         return Decrypted_msg;
     }
 
