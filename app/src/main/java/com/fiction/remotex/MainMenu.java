@@ -54,7 +54,7 @@ public class MainMenu extends AppCompatActivity
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_menu);
-
+        Toast.makeText(MainMenu.this, "Connected", Toast.LENGTH_SHORT).show();
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
@@ -340,7 +340,12 @@ public class MainMenu extends AppCompatActivity
                     runOnUiThread(new Runnable() {
                         public void run() {
                             try {
-                                showSystemInfo(sysInfo);
+                                if(sysInfo==null ||  sysInfo.length()<1){
+                                    socketServiceObject.disconnect();
+                                    socketServiceObject.check_connection();
+                                }else{
+                                    showSystemInfo(sysInfo);
+                                }
                             } catch (JSONException e) {
                                 Log.e(this.getClass().toString(), e.getMessage());
                             }

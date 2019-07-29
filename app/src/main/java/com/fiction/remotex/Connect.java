@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
@@ -18,12 +19,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -241,35 +244,40 @@ public class Connect extends Activity {
         }
     }
 
+    public void Show_prompt(){
+
+        AlertDialog.Builder pwd_builder = new AlertDialog.Builder(this);
+        AlertDialog pwd_dialog;
+        LayoutInflater inflater = LayoutInflater.from(this);
+        final View prompt_view = inflater.inflate(R.layout.password_prompt,null);
+        pwd_builder.setView(prompt_view)
+                .setPositiveButton("Connect", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        EditText pwd = (EditText)prompt_view.findViewById(R.id.password);
+                          socketServiceObject.Password = (pwd.getText().toString()).trim();
+                          tryConnect();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+
+        pwd_dialog = pwd_builder.create();
+        pwd_dialog.show();
+
+    }
+
     public void Connect_onclick(View v) {
         String ip = ((TextInputEditText) findViewById(R.id.edit_IP)).getText().toString();
         if (!validIP(ip)) {
             Toast.makeText(this, "Enter Valid IP address", Toast.LENGTH_SHORT).show();
             return;
         }
-        Toast.makeText(this, "Connecting...", Toast.LENGTH_SHORT).show();
-        tryConnect();
-
-        // check after some time if device input_stream connected....
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (socketServiceObject.isconnected()) {
-                    showMenu();
-                } else {
-                    Log.e("conn ", "Not connected" );
-                    //showMenu();
-                }
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        if (!socketServiceObject.isconnected())
-                            Toast.makeText(Connect.this, "Unable to Connect", Toast.LENGTH_SHORT).show();
-                        else
-                            Toast.makeText(Connect.this, "Connected", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        }, 2000);
+        Show_prompt();
     }
 
 

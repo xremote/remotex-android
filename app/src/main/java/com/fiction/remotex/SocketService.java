@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.Environment;
+import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 import android.widget.Toast;
@@ -42,6 +43,7 @@ public class SocketService extends Service {
     public boolean cleaning_stream = false;
     private int heartbeat_count = 0;
     public String Password = "fiction";
+    public Boolean connection_ack_received = false;
 
     //not used as of now
     public String GetServerName() {
@@ -226,7 +228,7 @@ public class SocketService extends Service {
     }
 
     public void sendMessage(final String message) {
-        if( !message.equals("syncback") && (!check_connection() || cleaning_stream)){
+        if( !message.equals("syncback") && (cleaning_stream)){
          return;
         }
 
@@ -250,20 +252,44 @@ public class SocketService extends Service {
     }
 
     public String recieveMessage() {
-        return crypt_receivemsg();
+        String plainmsg = crypt_receivemsg();
+        if(valid_msg(plainmsg)){
+
+            return plainmsg;
+        }
+        else{
+            disconnect();
+            check_connection();
+        }
+        return "";
+    }
+
+    public boolean valid_msg(String plainmsg){
+        if(plainmsg==null) return false;
+        return true;
     }
 
     public boolean check_connection() {
         if (!isconnected()) {
             disconnect();
-            Toast.makeText(SocketService.this, "Disconnected", Toast.LENGTH_SHORT).show();
-            Intent dialogIntent = new Intent(this, Connect.class);
-            dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            this.startActivity(dialogIntent);
+            show_connect_activity();
             return false;
         }
         return true;
     }
+
+    public void show_connect_activity(){
+        Intent dialogIntent = new Intent(this, Connect.class);
+        dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.startActivity(dialogIntent);
+    }
+
+    public void show_mainmenu_activity(){
+        Intent dialogIntent = new Intent(this, MainMenu.class);
+        dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.startActivity(dialogIntent);
+    }
+
 
 
     @Override
@@ -274,6 +300,7 @@ public class SocketService extends Service {
 
     public void connect(String hostname) {
         if (socket == null) {
+            connection_ack_received = false;
             tryhostname = hostname;
             Runnable connect = new connectSocket();
             new Thread(connect).start();
@@ -282,8 +309,10 @@ public class SocketService extends Service {
 
     public boolean isconnected() {
         try {
-            if (socket == null || !socket.isConnected() || output_writer == null || output_writer.checkError())
+            if (socket == null || !socket.isConnected() ||
+                    output_writer == null || output_writer.checkError() || !connection_ack_received){
                 return false;
+            }
             else
                 return true;
         } catch (Exception e) {
@@ -346,6 +375,8 @@ public class SocketService extends Service {
                     input_stream = socket.getInputStream();
                     inputreader = new InputStreamReader(socket.getInputStream());
 
+                    wait_while_connecting();
+
                 } catch (Exception e) {
                     e.printStackTrace();
                     Log.e(this.getClass().toString(),e.getMessage());
@@ -356,6 +387,43 @@ public class SocketService extends Service {
             }
         }
     }
+
+    public void wait_while_connecting(){
+        // check if exactly one service input_stream running  using logs.. keep counting indefinitely
+        final Thread check_conn_success = new Thread() {
+            @Override
+            public void run() {
+                int times = 3;
+                while (times>0) {
+                    times-=1;
+                    if(output_writer!=null && socket.isConnected()){
+                        get_connection_ack();
+                        Log.e("time ",""+times);
+                        break;
+                    }
+                    android.os.SystemClock.sleep(100);
+                }
+            }
+        };
+        check_conn_success.start();
+    }
+
+
+    public void get_connection_ack(){
+        sendMessage("connected");
+        String msg = recieveMessage();
+        Log.e("whatistha ",msg);
+        if(msg.equals("connected")){
+            connection_ack_received = true;
+            show_mainmenu_activity();
+        }
+        else{
+            check_connection();
+        }
+
+    }
+
+
 
 //    final send messages wrapper
 
@@ -378,7 +446,6 @@ public class SocketService extends Service {
         }catch (Exception e){
 
         }
-        
         return Decrypted_msg;
     }
 
@@ -391,8 +458,6 @@ public class SocketService extends Service {
         }
         return len;
     }
-
-
 
     @Override
     public void onDestroy() {
