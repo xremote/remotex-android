@@ -4,93 +4,88 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
-import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.material.button.MaterialButton;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+
 import com.google.android.material.textfield.TextInputEditText;
 
 import java.io.File;
-import java.net.InetAddress;
 import java.util.ArrayList;
 
 public class Connect extends Activity {
 
     SocketService socketServiceObject;
-    boolean isSocketServiceBounded = false;
     private int backpressed = 0;
-    private ArrayList<ClientScanResult> devicesArray;
-    private static final String TAG = "zedmessage";
+    private ArrayList<ClientScanResult> DevicesList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_connect);
-        Log.i(TAG, "Exception list1: ");
+        getFileStoragePermission();
         findConnectedDevices();
-
     }
 
     @Override
     protected void onResume() {
 
-        Intent i = new Intent(this,SocketService.class);
+        //bind this activity to background service
+        Intent i = new Intent(this, SocketService.class);
         bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
-        getFileStoragePermission();
-        Log.e(this.getClass().toString(),"resumed");
-        if (socketServiceObject!=null && socketServiceObject.isconnected()) {
+
+        if (socketServiceObject != null && socketServiceObject.isconnected()) {
+            // if already connected
             showMenu();
+            Log.e("conn1 ", "Not connected" );
         }
 
-        // check after 10ms is device connected....
+        // check once more after 10ms if device input_stream connected....
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (socketServiceObject!=null && socketServiceObject.isconnected()) {
+
+                if (socketServiceObject != null && socketServiceObject.isconnected()) {
                     showMenu();
-                }
-                else{
-                    //showMenu();
+                    Log.e("conn2 ", "Not connected" );
+                } else {
+                    Log.e("conn1 ", "Nots connected" );
+                    //do nothing
                 }
             }
-        }, 10);
-
+        }, 2000);
         super.onResume();
     }
 
     @Override
     public void onBackPressed() {
-
-        if(backpressed==0){
-            backpressed+=1;
+        // to avoid closing app by mistake
+        if (backpressed == 0) {
+            backpressed += 1;
             Toast.makeText(Connect.this, "Press Back Again to Exit", Toast.LENGTH_SHORT).show();
-        }else{
+        } else {
             super.onBackPressed();
         }
     }
@@ -98,58 +93,61 @@ public class Connect extends Activity {
 
     @Override
     protected void onPause() {
+        // unbind from background service
         unbindService(serviceConnection);
         super.onPause();
     }
 
     public void findConnectedDevices() {
 
-        final WifiApManager wifiApManager =  new WifiApManager(this);
+        final WifiApManager wifiApManager = new WifiApManager(this);
 
         // load connected devices list in background thread
         final Thread getConnectedDevices = new Thread() {
             @Override
             public void run() {
                 try {
-                    devicesArray = wifiApManager.getClientList(false);
+                    DevicesList = wifiApManager.getClientList(false);
                 } catch (Exception e) {
-                    Log.i(TAG, "get wifi device list" + e);
+
                 }
 
                 runOnUiThread(new Runnable() {
                     public void run() {
                         try {
 
-                            if (devicesArray.size()>0) {
-                                NoDeviceError(false);
+                            if (DevicesList.size() > 0) {
+                                ShowNoDeviceError(false);
                                 showDevicesList();
-                            } else{
-                                NoDeviceError(true); // show "no device error"
+                            } else {
+                                ShowNoDeviceError(true); // show "no device error"
                                 showDevicesList();
                             }
-                        }catch (Exception e){
-                            Log.i(TAG, "get wifi device list ui" + e);
+                        } catch (Exception e) {
+                            Log.e(this.getClass().toString(), e.getMessage());
                         }
                     }
                 });
             }
         };
+
+        // start the thread
         getConnectedDevices.start();
     }
 
 
     public void showDevicesList() {
 
-        String namesArray[] = new String[devicesArray.size()] ;
+        String DevicesInfo[] = new String[DevicesList.size()];
 
-        int index =0;
-        for(ClientScanResult device : devicesArray){
-            namesArray[index] = device.getIpAddr() + ":";
+        int index = 0;
+        for (ClientScanResult device : DevicesList) {
+            DevicesInfo[index] = device.getIpAddr() + ":";
             index++;
         }
 
-        final ListView devicesListView = (ListView) findViewById(R.id.listView);
-        ArrayAdapter<String> adapter = new CustomAdapter(this, namesArray);
+        final ListView devicesListView = (ListView) findViewById(R.id.DeviceList);
+        ArrayAdapter<String> adapter = new CustomAdapter(this, DevicesInfo);
         devicesListView.setAdapter(adapter);
         devicesListView.setFocusable(true);
 
@@ -159,10 +157,8 @@ public class Connect extends Activity {
                     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                         String value = (String) devicesListView.getItemAtPosition(i);
                         value = value.substring(0, value.indexOf(':'));
-                        TextInputEditText et = (TextInputEditText) findViewById(R.id.edit_IP);
-//                        EditText et = (EditText) findViewById(R.id.edit_IP);
-
-                        et.setText(value);
+                        TextInputEditText edit_IP = (TextInputEditText) findViewById(R.id.edit_IP);
+                        edit_IP.setText(value);
                     }
                 }
         );
@@ -170,76 +166,75 @@ public class Connect extends Activity {
 
     public static class CustomAdapter extends ArrayAdapter<String> {
 
-        public CustomAdapter(Context context, String[] namesArray) {
-            super(context, R.layout.ip_list, namesArray);
+        public CustomAdapter(Context context, String[] DevicesInfo) {
+            super(context, R.layout.connect_list_layout, DevicesInfo);
         }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             LayoutInflater layoutInflater = LayoutInflater.from(getContext());
-            View view = layoutInflater.inflate(R.layout.ip_list, parent, false);
+            View view = layoutInflater.inflate(R.layout.connect_list_layout, parent, false);
 
             String ip_host = getItem(position);
 
-            String Item1 = ip_host.split(":")[1]; // host name
-            String Item2 = ip_host.split(":")[0];
+            String hostName = ip_host.split(":")[1]; // host name
+            String hostIP = ip_host.split(":")[0];
 
-            if(Item1.contains(Item2)){
-                Item1 = "Unknown Host";
+            if (hostName.contains(hostIP)) {
+                hostName = "Unknown Host";
             }
-            Item2+=":";
+            hostIP += ":";
 
-            TextView textView = (TextView) view.findViewById(R.id.text);
-            TextView textView2 = (TextView) view.findViewById(R.id.text2);
-            ImageView imageView = (ImageView) view.findViewById(R.id.imageView);
+            TextView host_text = (TextView) view.findViewById(R.id.device_host);
+            TextView ip_text = (TextView) view.findViewById(R.id.device_IP);
+            ImageView device_image = (ImageView) view.findViewById(R.id.drive_image);
 
-            textView.setText(Item1);
-            textView2.setText(Item2);
+            host_text.setText(hostName);
+            ip_text.setText(hostIP);
             return view;
         }
     }
-
 
 
     public void getFileStoragePermission() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
         }
+        // create download folder if not present
         File dir = new File(Environment.getExternalStorageDirectory() + "/Download/Remote Devices");
         if (!dir.exists())
             dir.mkdirs();
     }
 
 
-    public void Refreshlist(View v) {
+    public void Refreshlist_onclick(View v) {
         findConnectedDevices();
     }
 
-    public void NoDeviceError(boolean noDeviceFound) {
+    public void ShowNoDeviceError(boolean noDeviceFound) {
         RelativeLayout noDeviceLayout = (RelativeLayout) findViewById(R.id.notfound_layout);
-
-        if(noDeviceFound) noDeviceLayout.setVisibility(RelativeLayout.VISIBLE);
+        if (noDeviceFound) noDeviceLayout.setVisibility(RelativeLayout.VISIBLE);
         else noDeviceLayout.setVisibility(RelativeLayout.GONE);
     }
 
-    public static boolean validIP (String ip) {
+    public static boolean validIP(String ip) {
         try {
-            if ( ip == null || ip.isEmpty() ) {
+            if (ip == null || ip.isEmpty()) {
                 return false;
             }
 
-            String[] parts = ip.split( "\\." );
-            if ( parts.length != 4 ) {
+            String[] parts = ip.split("\\.");
+            if (parts.length != 4) {
                 return false;
             }
 
-            for ( String s : parts ) {
-                int i = Integer.parseInt( s );
-                if ( (i < 0) || (i > 255) ) {
+            for (String s : parts) {
+                int i = Integer.parseInt(s);
+                if ((i < 0) || (i > 255)) {
                     return false;
                 }
             }
-            if ( ip.endsWith(".") ) {
+            if (ip.endsWith(".")) {
                 return false;
             }
 
@@ -249,41 +244,46 @@ public class Connect extends Activity {
         }
     }
 
-    public void onConnect(View v) {
+    public void Show_prompt(){
+
+        AlertDialog.Builder pwd_builder = new AlertDialog.Builder(this);
+        AlertDialog pwd_dialog;
+        LayoutInflater inflater = LayoutInflater.from(this);
+        final View prompt_view = inflater.inflate(R.layout.password_prompt,null);
+        pwd_builder.setView(prompt_view)
+                .setPositiveButton("Connect", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        EditText pwd = (EditText)prompt_view.findViewById(R.id.password);
+                          socketServiceObject.Password = (pwd.getText().toString()).trim();
+                          tryConnect();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.cancel();
+                    }
+                });
+
+
+        pwd_dialog = pwd_builder.create();
+        pwd_dialog.show();
+
+    }
+
+    public void Connect_onclick(View v) {
         String ip = ((TextInputEditText) findViewById(R.id.edit_IP)).getText().toString();
-        if(!validIP(ip)){
+        if (!validIP(ip)) {
             Toast.makeText(this, "Enter Valid IP address", Toast.LENGTH_SHORT).show();
             return;
         }
-        Toast.makeText(this, "Connecting...", Toast.LENGTH_SHORT).show();
-        tryConnect();
-
-
-        // check after 500ms is device connected....
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (socketServiceObject.isconnected()) {
-                    showMenu();
-                }
-                else{
-                    //showMenu();
-                }
-                runOnUiThread(new Runnable() {
-                    public void run() {
-                        if (!socketServiceObject.isconnected())
-                            Toast.makeText(Connect.this, "Unable to Connect", Toast.LENGTH_SHORT).show();
-                        else
-                            Toast.makeText(Connect.this, "Connected", Toast.LENGTH_SHORT).show();
-                    }
-                });
-            }
-        }, 600);
+        Show_prompt();
     }
 
 
-    public void showhelp(View V){
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"));
+    public void showhelp_onclick(View V) {
+        String helpURL = "https://www.google.com";
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(helpURL));
         startActivity(browserIntent);
     }
 
@@ -296,12 +296,13 @@ public class Connect extends Activity {
             socketServiceObject.isservicerunning = true;
         }
         try {
-            socketServiceObject.connect( ((TextInputEditText) findViewById(R.id.edit_IP)).getText().toString() );
-        } catch (Exception e) {       }
+            socketServiceObject.connect(((TextInputEditText) findViewById(R.id.edit_IP)).getText().toString());
+        } catch (Exception e) {
+            Log.e(this.getClass().toString(), e.getMessage());
+        }
     }
 
     public void showMenu() {
-//        Intent mainIntent = new Intent(this, MainMenu.class);
         Intent mainIntent = new Intent(this, MainMenu.class);
         this.startActivity(mainIntent);
         this.finish();
@@ -311,43 +312,14 @@ public class Connect extends Activity {
     private ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-
             SocketService.LocalBinder binder = (SocketService.LocalBinder) iBinder;
             socketServiceObject = binder.getService();
-            isSocketServiceBounded = true;
         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
             socketServiceObject = null;
-            isSocketServiceBounded = false;
         }
     };
-
-
-    private void showInfo() {
-        try {
-            View layout = ( (LayoutInflater) this.
-                    getSystemService(Context.LAYOUT_INFLATER_SERVICE)).
-                    inflate(R.layout.popup_view,(ViewGroup) findViewById(R.id.popup_element));
-
-            Point displaySize = new Point();
-            getWindowManager().getDefaultDisplay().getSize(displaySize);
-
-            final PopupWindow infoWindow = new PopupWindow(layout,displaySize.x-10,displaySize.y-10,true);
-            infoWindow.showAtLocation(layout, Gravity.CENTER, 0, 0);
-
-             ((Button) layout.findViewById(R.id.ok_button)).           // ok button on info window layout
-                 setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    infoWindow.dismiss();
-                }
-            });
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
 }

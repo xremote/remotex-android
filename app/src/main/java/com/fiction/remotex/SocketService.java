@@ -8,13 +8,11 @@ import android.os.Binder;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -23,7 +21,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -32,38 +29,39 @@ import java.nio.ByteOrder;
 
 public class SocketService extends Service {
     public Bitmap bmpimage = null;
-    public String Result ="nothing";
-    public String clientname="client";
-    public String servername ="server";
+    public String clientname = "client";
+    public String servername = "server";
     public String tryhostname = null;
     public boolean isservicerunning = false;
-    public boolean isrecieving = false;
-    public int  percentdownloaded = 0;
-    PrintWriter out;
+    public int percentdownloaded = 0;
+    PrintWriter output_writer;
     InputStreamReader inputreader;
-    InputStream is;
-    DataInputStream dis;
+    InputStream input_stream;
     Socket socket;
-    InetAddress serverAddr;
-    BufferedReader br;
-    private static final String TAG = "zedmessage";
+    BufferedReader buffer_reader;
     public boolean downloadingfile = false;
     public boolean cleaning_stream = false;
+    private int heartbeat_count = 0;
+    public String Password = "fiction";
+    public Boolean connection_ack_received = false;
 
-    private int count = 0;
+    //not used as of now
+    public String GetServerName() {
+        return servername;
+    }
+    public String GetClientName() {
+        return clientname;
+    }
+
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO Auto-generated method stub
-
         return myBinder;
     }
 
     private final IBinder myBinder = new LocalBinder();
-   // TCPClient mTcpClient = new TCPClient();
 
     public class LocalBinder extends Binder {
         public SocketService getService() {
-
             return SocketService.this;
 
         }
@@ -72,402 +70,412 @@ public class SocketService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        start_heartbeat_counting();
+    }
 
+    public void start_heartbeat_counting(){
 
-        final Thread newt = new Thread() {
+        // check if exactly one service input_stream running  using logs.. keep counting indefinitely
+        final Thread heartbeat_thread = new Thread() {
             @Override
             public void run() {
-                while(true) {
-                    Log.e(this.getClass().toString(), count + "");
-                    count++;
-
+                while (true) {
+                    Log.e(this.getClass().toString(), heartbeat_count + " " + isconnected());
+                    heartbeat_count++;
                     android.os.SystemClock.sleep(2000);
                 }
             }
         };
-        Log.e(this.getClass().toString(),"what");
-        newt.start();
-
-
+        heartbeat_thread.start();
     }
-
-    public void IsBoundable(){
-
-
-    }
-
-
 
 
     public void recieveimage() throws IOException {
 
-                isrecieving = true;
-
-                 File dir = new File(Environment.getExternalStorageDirectory() + "/Download/Remote Devices/temp");
-            if(!dir.exists())
-                dir.mkdirs();
+        File download_directory = new File(Environment.getExternalStorageDirectory() + "/Download/Remote Devices/temp");
+        if (!download_directory.exists())
+            download_directory.mkdirs();
 
 
-            String outFileName = Environment.getExternalStorageDirectory() + "/Download/Remote Devices/temp/tempfile.jpg";
+        String output_filename = Environment.getExternalStorageDirectory() + "/Download/Remote Devices/temp/tempfile.jpg";
 
-            File myfile = new File(outFileName);
-                try{
+        File output_file = new File(output_filename);
+        try {
+            output_file.setWritable(true, false);
+            output_file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(this.getClass().toString(),e.getMessage());
+        }
 
-            myfile.setWritable(true, false);
-           myfile.createNewFile();
+        FileOutputStream output_stream = new FileOutputStream(output_file, false);
+        try {
+            output_stream = new FileOutputStream(output_filename);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Log.e(this.getClass().toString(),e.getMessage());
+        }
 
-            } catch (IOException e) {
+        //transfer bytes from the inputfile to the outputfile
+        int totalbytes = 0;
+        byte[] buffer = new byte[1024 * 8];
+        crypt_inputread(buffer, 0, 8);
+        int length;
+        int received_bytes = 0;
 
-                    e.printStackTrace();
-
-                }
-
-            FileOutputStream myOutput = new FileOutputStream(myfile, false);
-            try
-            {
-
-                myOutput = new FileOutputStream(outFileName);
-            } catch (FileNotFoundException e) {
-
-                e.printStackTrace();
-            }
-
-
-            //transfer bytes from the inputfile to the outputfile
-            int bytesrecieved = 0;
-            int count = 1;
-            int totalbytes = 0;
-            byte[] buffer = new byte[1024 * 8];
-            is.read(buffer, 0, 8);
-            int length;
-            int recievedl = 0;
-
-            ByteBuffer buffer1 = ByteBuffer.wrap(buffer);
-            buffer1.order(ByteOrder.LITTLE_ENDIAN);
-            totalbytes = (int) buffer1.getLong();
+        ByteBuffer tmp_buffer = ByteBuffer.wrap(buffer); // change order to little endian
+        tmp_buffer.order(ByteOrder.LITTLE_ENDIAN);
+        totalbytes = (int) tmp_buffer.getLong();
 
 
-            while (recievedl < totalbytes && (length = is.read(buffer, 0, buffer.length)) > 0) {
-                myOutput.write(buffer, 0, length);
-                recievedl += length;
-            }
+        while (received_bytes < totalbytes && (length = crypt_inputread(buffer, 0, buffer.length)) > 0) {
+            output_stream.write(buffer, 0, length);
+            received_bytes += length;
+        }
 
-            //Close the streams
-
-                //Log.i(TAG,totalbytes + " recieved: " + recievedl);
-//            Toast.makeText(SocketService.this, recievedl + "copied" + totalbytes, Toast.LENGTH_LONG).show();
-
-            myOutput.flush();
-            myOutput.close();
-         //   is.close();
-
-        isrecieving=false;   bmpimage = BitmapFactory.decodeFile(outFileName);
-            // is.close();
-
+        //Close the streams
+        output_stream.flush();
+        output_stream.close();
+        bmpimage = BitmapFactory.decodeFile(output_filename);
     }
-
 
 
     public void recievefile(String savename) throws IOException {
 
+        int totalbytes = 0;
+        downloadingfile = true;
 
-            int bytesrecieved = 0;
-            int count = 1;
-            int totalbytes = 0;
-            downloadingfile = true;
+        File download_directory = new File(Environment.getExternalStorageDirectory() + "/Download/Remote Devices/Downloaded");
 
-            File dir = new File(Environment.getExternalStorageDirectory() + "/Download/Remote Devices/Downloaded");
+        if (!download_directory.exists())
+            download_directory.mkdirs();
 
-        if(!dir.exists())
-                dir.mkdirs();
+        String output_filename = Environment.getExternalStorageDirectory() + "/Download/Remote Devices/Downloaded/" + savename;
+        File output_file = new File(output_filename);
 
-            String outFileName = Environment.getExternalStorageDirectory() + "/Download/Remote Devices/Downloaded/" + savename;
-            File myfile = new File(outFileName);
+        try {
 
+            output_file.setWritable(true, false);
+            output_file.createNewFile();
 
-        try{
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(this.getClass().toString(),e.getMessage());
+        }
 
-                myfile.setWritable(true, false);
-                myfile.createNewFile();
-
-            } catch (IOException e) {
-
-                e.printStackTrace();
-
-            }
-
-            FileOutputStream myOutput = new FileOutputStream(myfile, false);
-            try
-            {
-
-                myOutput = new FileOutputStream(outFileName);
-            } catch (FileNotFoundException e) {
-
-                e.printStackTrace();
-            }
-
-
-            //transfer bytes from the inputfile to the outputfile
-            byte[] buffer = new byte[1024 * 128];
-
-            is.read(buffer, 0, 8);
-            int length;
-
-            int recievedl = 0;
-            ByteBuffer buffer1 = ByteBuffer.wrap(buffer);
-            buffer1.order(ByteOrder.LITTLE_ENDIAN);
-            totalbytes = (int) buffer1.getLong();
-
-        int flg=0;
-        if(totalbytes>0) {
-            int unitpercent = totalbytes / 100;
-            //socket.setSoTimeout(2000);
+        byte[] buffer = new byte[1024 * 128];
+        FileOutputStream output_stream = new FileOutputStream(output_file, false);
+        try {
+            output_stream = new FileOutputStream(output_filename);
             cleaning_stream = true;
-            try {
-                while (recievedl < totalbytes && (length = is.read(buffer, 0, buffer.length)) > 0) {
+            crypt_inputread(buffer, 0, 8);
+        } catch (Exception e) {
+            Log.e(this.getClass().toString(),e.getMessage());
+        }
 
-                    if(!downloadingfile && flg==0){
-                        android.os.SystemClock.sleep(4000);
-                        socket.setSoTimeout(500);
-                        flg=1;
-                    }
-                    myOutput.write(buffer, 0, length);
+        //transfer bytes from the inputfile to the outputfile
 
-                    recievedl += length;
-                    Log.e(this.getClass().toString(),"pd "+percentdownloaded);
-                    percentdownloaded = (int) (1.0 * recievedl / unitpercent);
-                }
-            }
-            catch (Exception e){
-                Log.e(this.getClass().toString(),"error " + e.getMessage());
-            }
+        int length;
 
+        int received_bytes = 0;
+
+        ByteBuffer tmp_buffer = ByteBuffer.wrap(buffer); // temp buffer to change order to little endian
+        tmp_buffer.order(ByteOrder.LITTLE_ENDIAN);
+        totalbytes = (int) tmp_buffer.getLong();
+
+        if(totalbytes==-1){
+            socket.setSoTimeout(500);
+            //server stopped sending file.. or was not able to send.
         }
 
 
-        socket.setSoTimeout(0);
-        Log.e(this.getClass().toString(),"pd out"+percentdownloaded);
-        if(recievedl ==totalbytes){
-            percentdownloaded=100;
+        boolean server_timed_out = false; // did server stop sending because of time output_writer
+
+        if (totalbytes > 0) {
+            int unitpercent = totalbytes / 100;
+
+            try {
+                while (received_bytes < totalbytes && (length = crypt_inputread(buffer, 0, buffer.length)) > 0) {
+
+                    if (!downloadingfile && server_timed_out==false) {
+                        // wait until server gets time out output_writer
+                        // a guess of 4 secs
+                        socket.setSoTimeout(500); // stop cleaning stream if there is nothing to read.
+                        server_timed_out = true;
+                    }
+                    output_stream.write(buffer, 0, length);
+                    received_bytes += length;
+                    percentdownloaded = (int) (1.0 * received_bytes / unitpercent);
+                }
+            } catch (Exception e) {
+                Log.e(this.getClass().toString(),e.getMessage() + "waht ");
+                e.printStackTrace();
+
+            }
+        }
+        Log.e(this.getClass().toString(),"cleaning");
+        socket.setSoTimeout(0); // set back to infinite
+        if (received_bytes == totalbytes) {
+            percentdownloaded = 100;
         }
 
         downloadingfile = false;
 
-            myOutput.flush();
-            myOutput.close();
-            //   is.close();
+        output_stream.flush();
+        output_stream.close();
+
         cleaning_stream = false;
     }
 
+    public void sendMessage(final String message) {
+        if( !message.equals("syncback") && (cleaning_stream)){
+         return;
+        }
 
-
-
-public boolean donow = true;
-
-    public void sendMessage(final String message){
-        check_connection();
-
-        final Thread tm = new Thread() {
+        final Thread send_msg_thread = new Thread() {
             @Override
             public void run() {
-                Log.e(TAG,"sendmsg: "+ message);
-                if (out != null && !out.checkError()) {
-                    Log.e(TAG,"sendmsg2: "+ message);
-                    //Toast.makeText(SocketService.this,"message",Toast.LENGTH_LONG).show();
+                if (output_writer != null && !output_writer.checkError()) {
                     try {
-                        out.println(message);
-
+                        crypt_sendmsg(message);
                     } catch (Exception e) {
-                        donow=true;
-                        Log.e(TAG,"sendmsg3: "+ e);
+                        e.printStackTrace();
+                        Log.e(this.getClass().toString(),e.getMessage());
                     }
-                    out.flush();
-                    Log.e(TAG,"sendmsg4: "+ message);
-                }else{
-                    Log.e(TAG,"can't sendmsg4: "+ message);
+                    output_writer.flush();
+                } else {
+                    Log.e(this.getClass().toString(),"output writer input_stream null");
                 }
-
             }
         };
-        tm.start();
-
+        send_msg_thread.start();
     }
 
-public boolean checkasc(String line){
-        for(int i=0;i<line.length();i++){
+    public String recieveMessage() {
+        String plainmsg = crypt_receivemsg();
+        if(valid_msg(plainmsg)){
 
-            if(line.charAt(i)<32 ||  line.charAt(i)>127 )
-                return false;
+            return plainmsg;
+        }
+        else{
+            disconnect();
+            check_connection();
+        }
+        return "";
+    }
+
+    public boolean valid_msg(String plainmsg){
+        if(plainmsg==null) return false;
+        return true;
+    }
+
+    public boolean check_connection() {
+        if (!isconnected()) {
+            disconnect();
+            show_connect_activity();
+            return false;
         }
         return true;
-}
-
-
-    public String recieveMessage(){
-        String line = null;
-        try{
-                line = br.readLine();
-                Log.e(this.getClass().toString(),   donow + " br " + line);
-         }
-        catch(Exception e){
-            Log.e(this.getClass().toString(), "bre " + line);
-         Log.i(TAG,"exe " + e);
-            //Toast.makeText(SocketService.this, "exe " + e, Toast.LENGTH_LONG).show();
-        }
-      if(line==null){
-          line ="nula";
-      }
-//      else if(!checkasc(line)){
-//          line = recieveMessage();
-//      }
-           return line;
     }
 
-    public void check_connection(){
-
-        if( !isconnected() ) {
-            disconnect();
-            Toast.makeText(SocketService.this, "Disconnected", Toast.LENGTH_SHORT).show();
-            Intent dialogIntent = new Intent(this, Connect.class);
-            dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            this.startActivity(dialogIntent);
-        }
-
+    public void show_connect_activity(){
+        Intent dialogIntent = new Intent(this, Connect.class);
+        dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.startActivity(dialogIntent);
     }
+
+    public void show_mainmenu_activity(){
+        Intent dialogIntent = new Intent(this, MainMenu.class);
+        dialogIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        this.startActivity(dialogIntent);
+    }
+
 
 
     @Override
-    public int onStartCommand(Intent intent,int flags, int startId){
+    public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-
-            return START_STICKY;
+        return START_STICKY;
     }
 
-    public void connect(String hostname)
-    {
-
-        if(socket==null){
+    public void connect(String hostname) {
+        if (socket == null) {
+            connection_ack_received = false;
             tryhostname = hostname;
             Runnable connect = new connectSocket();
             new Thread(connect).start();
-
         }
     }
 
-    public boolean isconnected()
-    {
-        try{
-            if(socket==null || !socket.isConnected() || out==null || out.checkError())
+    public boolean isconnected() {
+        try {
+            if (socket == null || !socket.isConnected() ||
+                    output_writer == null || output_writer.checkError() || !connection_ack_received){
                 return false;
+            }
             else
                 return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(this.getClass().toString(),e.getMessage());
+            return false;
         }
-        catch (Exception e){
-            Log.i(TAG,"er "+e);
-            return  false;
+    }
+
+
+    public void disconnect() {
+        try {
+            socket.shutdownInput();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(this.getClass().toString(),e.getMessage());
         }
+        try {
+            socket.shutdownOutput();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(this.getClass().toString(),e.getMessage());
+        }
+        try {
+            socket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(this.getClass().toString(),e.getMessage());
+        }
+        socket = null;
     }
 
 
-    public void disconnect(){
 
-        try { socket.shutdownInput(); } catch (Exception e) { Log.i(TAG,""+e);}
-        try { socket.shutdownOutput(); } catch (Exception e) { Log.i(TAG,""+e);}
-        try {  socket.close(); } catch (Exception e) { Log.i(TAG,""+e);}
-
-        socket =null;
-        Log.i(TAG,"g ");
-    }
-
-
-    public String GetServerName()
-    {
-       return servername;
-    }
-
-
-    public String GetClientName()
-    {
-        return clientname;
-    }
-
-
-    public String checker()
-    {
-            return Result;
-    }
     class connectSocket implements Runnable {
-
         @Override
         public void run() {
-
-
             int port = 2055;
+            try {
+                try {
+                    socket = new Socket(tryhostname, port);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.e(this.getClass().toString(),e.getMessage());
+                    tryhostname = null;
+                    return;
+                }
 
-           try {
-               try {
-                   socket = new Socket(tryhostname, port);
-               }
-               catch(Exception e){
+                InetSocketAddress localSocketAddress = (InetSocketAddress) socket.getLocalSocketAddress();
+                clientname = localSocketAddress.getHostName();
 
-                   tryhostname=null;
-                   return;
-               }
-
-                InetSocketAddress clAddress = (InetSocketAddress)socket.getLocalSocketAddress();
-               clientname = clAddress.getHostName();
-
-                InetSocketAddress seAddress = (InetSocketAddress)socket.getRemoteSocketAddress();
-                servername = seAddress.getHostName();
+                InetSocketAddress serverAddress = (InetSocketAddress) socket.getRemoteSocketAddress();
+                servername = serverAddress.getHostName();
 
                 try {
                     //send the message to the server
-                    out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
-                    dis =   new DataInputStream(socket.getInputStream());
-                    br = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-                    is = socket.getInputStream();
+                    output_writer = new PrintWriter(new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())), true);
+                    buffer_reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+
+                    input_stream = socket.getInputStream();
                     inputreader = new InputStreamReader(socket.getInputStream());
-                    Log.e(this.getClass().toString(),"out ready");
-                }
-                catch (Exception e) {
 
-                    Log.e("TCP", "S: Error", e);
+                    wait_while_connecting();
 
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Log.e(this.getClass().toString(),e.getMessage());
                 }
             } catch (Exception e) {
-
-                Log.e("TCP", "C: Error", e);
-
+                e.printStackTrace();
+                Log.e(this.getClass().toString(),e.getMessage());
             }
+        }
+    }
 
+    public void wait_while_connecting(){
+        // check if exactly one service input_stream running  using logs.. keep counting indefinitely
+        final Thread check_conn_success = new Thread() {
+            @Override
+            public void run() {
+                int times = 3;
+                while (times>0) {
+                    times-=1;
+                    if(output_writer!=null && socket.isConnected()){
+                        get_connection_ack();
+                        Log.e("time ",""+times);
+                        break;
+                    }
+                    android.os.SystemClock.sleep(100);
+                }
+            }
+        };
+        check_conn_success.start();
+    }
+
+
+    public void get_connection_ack(){
+        sendMessage("connected");
+        String msg = recieveMessage();
+        Log.e("whatistha ",msg);
+        if(msg.equals("connected")){
+            connection_ack_received = true;
+            show_mainmenu_activity();
+        }
+        else{
+            check_connection();
         }
 
     }
 
 
-    @Override
-    public void onDestroy() {
 
-        Log.e(this.getClass().toString(),"destroying");
+//    final send messages wrapper
+
+    public void crypt_sendmsg(String msg){
+        Log.e("sentmessage ", msg);
+        String Encrypted_msg =  Encryption.encrypt(msg,Password);
+        Log.e("sentcryptmessage ", Encrypted_msg);
+        output_writer.println(Encrypted_msg);
+    }
+
+
+
+    public String crypt_receivemsg(){
+        String Decrypted_msg = null;
         try {
-
-            disconnect();
-            socket.close();
-
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        socket = null;
-        try{
-            Log.e(this.getClass().toString(),"please die service");
-            android.os.Process.killProcess(android.os.Process.myPid());
-
+            String msg = buffer_reader.readLine();
+            Log.e("recievedmessage ", msg);
+            Decrypted_msg =  Encryption.decrypt(msg,Password);
+            Log.e("rec_decdmessage ", Decrypted_msg);
         }catch (Exception e){
 
         }
-        super.onDestroy();
+        return Decrypted_msg;
     }
 
+    public int crypt_inputread(byte[] buffer, int offset, int length) throws IOException{
+        int len=0;
+        try {
+            len = input_stream.read(buffer, offset, length);
+        }catch (Exception e){
+            throw e;
+        }
+        return len;
+    }
 
+    @Override
+    public void onDestroy() {
+        try {
+            disconnect();
+            socket.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(this.getClass().toString(),e.getMessage());
+        }
+        socket = null;
+        try {
+            // please DIE DIE DIE.....
+            android.os.Process.killProcess(android.os.Process.myPid());
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.e(this.getClass().toString(),e.getMessage());
+        }
+        super.onDestroy();
+    }
 }

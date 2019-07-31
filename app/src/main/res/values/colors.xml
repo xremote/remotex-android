@@ -4,15 +4,12 @@
     <color name="colorPrimaryDark">#222831</color>
     <color name="colorAccent">#00ADB5</color>
     <color name="colorAccentDark">#373A6D</color>
-    <color name="colorPrimaryDark2">#292F3C</color>
+    <color name="colorPrimaryDarker">#292F3C</color>
 
     <color name="colorText">#F8F8F8</color>
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorDanger">#EF6932</color>
 
-    <color name="colorwhite_semi_transparent">#6BF3F1F1</color>
-
-    <color name="icons">#FFFFFF</color>
     <color name="divider">#BDBDBD</color>
     <color name="transparent">#00000000</color>
 

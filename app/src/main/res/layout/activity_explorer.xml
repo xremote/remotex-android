@@ -11,7 +11,7 @@
     >
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/card_view_bg"
+        android:id="@+id/card_head_bg"
         android:layout_width="match_parent"
         android:layout_height="20dp"
         android:layout_alignParentStart="true"
@@ -19,13 +19,11 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="false"
-        app:cardCornerRadius="0dp"
-        android:layout_gravity="center"
         app:cardBackgroundColor="@color/colorPrimary">
     </androidx.cardview.widget.CardView>
 
     <androidx.cardview.widget.CardView
-        android:id="@+id/card_view_h"
+        android:id="@+id/card_head"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
@@ -34,7 +32,7 @@
         android:layout_alignParentRight="true"
         android:layout_alignParentBottom="false"
         android:layout_gravity="center"
-        android:elevation="10dp"
+        android:elevation="@dimen/elevation_md"
         app:cardBackgroundColor="@color/colorPrimary"
         app:cardPreventCornerOverlap="true">
 
@@ -48,11 +46,11 @@
                 android:layout_height="wrap_content"
                 app:icon="@drawable/back"
                 android:textColor="@color/colorWhite"
-                app:cornerRadius="5dp"
+                app:cornerRadius="@dimen/corner_radius_sm"
                 app:iconTint="@color/colorWhite"
                 app:strokeColor="@color/colorWhite"
                 app:iconGravity="textStart"
-                app:iconSize="25dp"
+                app:iconSize="@dimen/image_md"
                 android:layout_marginLeft="7dp"
                 />
 
@@ -62,13 +60,13 @@
                 android:layout_width="60dp"
                 android:layout_height="wrap_content"
                 app:icon="@drawable/home"
-                android:layout_marginLeft="7dp"
+                android:layout_marginLeft="@dimen/margin_md"
                 android:textColor="@color/colorWhite"
-                app:cornerRadius="5dp"
+                app:cornerRadius="@dimen/corner_radius_sm"
                 app:iconTint="@color/colorWhite"
                 app:strokeColor="@color/colorWhite"
                 app:iconGravity="textStart"
-                app:iconSize="25dp"
+                app:iconSize="@dimen/image_md"
                 />
 
         </LinearLayout>
@@ -79,7 +77,7 @@
     <ListView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/listView"
+        android:id="@+id/DrivesList"
         android:clickable="false"
         android:focusable="true"
         android:stackFromBottom="false"
@@ -87,11 +85,11 @@
         android:scrollingCache="false"
         android:longClickable="false"
         android:textAlignment="center"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="@dimen/margin_md"
         android:textFilterEnabled="false"
         android:touchscreenBlocksFocus="false"
         tools:listitem="@android:layout/simple_list_item_1"
-        android:layout_below="@+id/card_view_h"
+        android:layout_below="@+id/card_head"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
 
@@ -100,7 +98,7 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/card_view_h"
+        android:layout_below="@id/card_head"
         android:id="@+id/empty_folder_layout">
         <ImageView
             android:layout_width="wrap_content"
@@ -115,7 +113,7 @@
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_below="@id/officer_b"
-            android:layout_marginTop="15dp"
+            android:layout_marginTop="@dimen/margin_xl"
             android:textSize="@dimen/text_size_xl"
             android:text="Move Along, Nothing to see here.\n Just an Empty Folder"
             android:textAlignment="center"
@@ -125,15 +123,13 @@
 
     </RelativeLayout>
 
-
-
     <!--loading spinner-->
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/card_view_h"
-        android:id="@+id/loading_layout"
+        android:layout_below="@id/card_head"
+        android:id="@+id/LoadingLayout"
         android:background="@color/colorText"
         >
 
@@ -142,19 +138,20 @@
             android:layout_height="match_parent" />
 
         <pl.droidsonroids.gif.GifImageView
+            android:id="@+id/LoadingImage"
             android:layout_width="match_parent"
             android:layout_height="70dp"
             android:src="@drawable/spinner"
             android:layout_marginTop="150dp"
-            android:id="@+id/loading_image" />
+             />
 
         <TextView
-            android:id="@+id/ErrorText"
+            android:id="@+id/LoadingText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_below="@id/loading_image"
-            android:textSize="@dimen/text_size"
+            android:layout_marginTop="@dimen/margin_md"
+            android:layout_below="@id/LoadingImage"
+            android:textSize="@dimen/text_size_md"
             android:fontFamily="sans-serif-light"
             android:textColor="@color/colorPrimary"
             android:layout_centerHorizontal="true"
@@ -162,6 +159,5 @@
             android:text="Please Wait..." />
 
     </RelativeLayout>
-
 
 </RelativeLayout>

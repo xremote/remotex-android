@@ -19,7 +19,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/Sensitivity_layout"
-            android:background="@color/colorPrimaryDark2"
+            android:background="@color/colorPrimaryDarker"
             >
             <TextView
                 android:layout_width="wrap_content"
@@ -32,7 +32,7 @@
                 android:layout_alignParentTop="true"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:layout_marginLeft="10dp"
+                android:layout_marginLeft="@dimen/margin_md"
                 android:textColor="@color/colorAccent"
                 android:layout_above="@+id/TrackPad" />
 
@@ -64,7 +64,7 @@
             android:layout_centerHorizontal="true"
             android:layout_above="@+id/Left_Click"
             android:textAllCaps="true"
-            android:textSize="50dp"
+            android:textSize="@dimen/text_size_xxl"
             android:textAlignment="center"
             android:gravity="center"
             android:textColor="@color/colorAccent" />
@@ -81,11 +81,9 @@
             android:layout_toLeftOf="@+id/Middle_Click"
             android:singleLine="false"
             android:textColor="@color/colorText"
-            app:cornerRadius="5dp"
+            app:cornerRadius="@dimen/corner_radius_sm"
             app:strokeColor="@color/colorAccent"
             />
-
-
 
         <com.google.android.material.button.MaterialButton
             style="@style/Widget.MaterialComponents.Button.OutlinedButton"
@@ -97,7 +95,7 @@
             android:layout_centerHorizontal="true"
             android:layout_below="@+id/TrackPad"
             android:textColor="@color/colorText"
-            app:cornerRadius="5dp"
+            app:cornerRadius="@dimen/corner_radius_sm"
             app:strokeColor="@color/colorAccent"/>
 
         <com.google.android.material.button.MaterialButton
@@ -112,10 +110,9 @@
             android:textColor="@color/colorText"
             android:layout_below="@+id/TrackPad"
             android:layout_toRightOf="@+id/Middle_Click"
-            app:cornerRadius="5dp"
+            app:cornerRadius="@dimen/corner_radius_sm"
             app:strokeColor="@color/colorAccent"
             />
-
 
     </RelativeLayout>
 

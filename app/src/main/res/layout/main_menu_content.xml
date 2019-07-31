@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".MainMenu"
+    tools:showIn="@layout/app_bar_main_menu">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_head_bg"
+            android:layout_width="match_parent"
+            android:layout_height="20dp"
+            app:cardBackgroundColor="@color/colorPrimaryDark"></androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:id="@+id/card_head"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:elevation="@dimen/elevation_md"
+            app:cardBackgroundColor="@color/colorPrimaryDark"
+            app:cardCornerRadius="5dp"
+            app:cardElevation="@dimen/elevation_sm"
+            app:cardPreventCornerOverlap="true">
+
+            <ImageView
+                android:id="@+id/ham_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/margin_lg"
+                android:onClick="toggle_nav_bar_onclick"
+                android:padding="10dp"
+                android:src="@drawable/ham_menu" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/windows_img"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="@dimen/margin_lg"
+                    android:src="@drawable/windows_logo" />
+
+                <TextView
+                    android:id="@+id/pc_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/windows_img"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="@dimen/margin_xs"
+                    android:fontFamily="sans-serif-light"
+                    android:text="PC/user Name"
+                    android:textColor="@color/colorText"
+                    android:textSize="@dimen/text_size_xl" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/disconnect_button"
+                    style="@style/Widget.MaterialComponents.Button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/pc_name"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="@dimen/margin_md"
+                    android:layout_marginBottom="@dimen/margin_md"
+                    android:onClick="disconnect_button"
+                    android:text="Disconnect"
+                    android:textColor="@color/colorText"
+                    android:theme="@style/AppTheme_Danger"
+                    app:cornerRadius="@dimen/corner_radius_sm" />
+
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+
+
+        <TextView
+            android:id="@+id/controls_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/card_head"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/margin_sm"
+            android:fontFamily="sans-serif-light"
+            android:text="Quick Controls"
+            android:textColor="@color/colorPrimary"
+            android:textSize="@dimen/text_size_xl" />
+
+        <LinearLayout
+            android:id="@+id/quick_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/controls_title"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="@dimen/margin_sm">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/prev_button"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:onClick="previoustrack"
+                android:textColor="@color/colorPrimary"
+                app:cornerRadius="@dimen/corner_radius_sm"
+                app:icon="@drawable/prev"
+                app:iconGravity="textStart"
+                app:iconSize="@dimen/image_md"
+                app:iconTint="@color/colorPrimary"
+                app:strokeColor="@color/colorAccent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/play_button"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_md"
+                android:onClick="playpause"
+                android:textColor="@color/colorPrimary"
+                app:cornerRadius="@dimen/corner_radius_sm"
+                app:icon="@drawable/play"
+                app:iconGravity="textStart"
+                app:iconSize="@dimen/image_md"
+                app:iconTint="@color/colorPrimary"
+                app:strokeColor="@color/colorAccent" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/next_button"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="@dimen/margin_md"
+                android:onClick="nexttrack"
+                android:textColor="@color/colorPrimary"
+                app:cornerRadius="@dimen/corner_radius_sm"
+                app:icon="@drawable/next"
+                app:iconGravity="textStart"
+                app:iconSize="@dimen/image_md"
+                app:iconTint="@color/colorPrimary"
+                app:strokeColor="@color/colorAccent" />
+
+
+        </LinearLayout>
+
+        <com.warkiz.widget.IndicatorSeekBar
+            android:id="@+id/vol_slider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/quick_layout"
+            android:layout_marginTop="@dimen/margin_sm"
+            app:isb_indicator_color="@color/colorPrimary"
+            app:isb_indicator_text_color="@color/colorAccent"
+            app:isb_indicator_text_size="18sp"
+            app:isb_max="100"
+            app:isb_min="0.0"
+            app:isb_only_thumb_draggable="false"
+            app:isb_progress="25"
+            app:isb_seek_smoothly="true"
+            app:isb_show_indicator="rounded_rectangle"
+            app:isb_show_tick_marks_type="oval"
+            app:isb_show_tick_texts="true"
+            app:isb_thumb_color="@color/colorPrimary"
+            app:isb_thumb_size="25dp"
+            app:isb_tick_marks_drawable="@mipmap/ic_launcher"
+            app:isb_tick_marks_size="13dp"
+            app:isb_tick_texts_color="@color/colorPrimary"
+            app:isb_tick_texts_size="15sp"
+            app:isb_ticks_count="0"
+            app:isb_track_background_color="@color/colorPrimary"
+            app:isb_track_background_size="2dp"
+            app:isb_track_progress_color="@color/colorPrimary"
+            app:isb_track_progress_size="4dp" />
+
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/mute_button"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/vol_slider"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="1dp"
+            android:onClick="volmute"
+            android:text="Mute"
+            android:textColor="@color/colorPrimary"
+            app:cornerRadius="@dimen/corner_radius_sm"
+            app:strokeColor="@color/colorAccent"
+
+            />
+
+        <View
+            android:id="@+id/hr"
+            android:layout_width="fill_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/mute_button"
+            android:layout_marginHorizontal="40dp"
+            android:background="@color/colorPrimary" />
+
+        <RelativeLayout
+            android:id="@+id/mouse_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/hr"
+            android:layout_marginTop="@dimen/margin_sm">
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:animationCache="false"
+                android:background="@color/colorgrey">
+
+                <TextView
+                    android:id="@+id/TrackPad"
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_above="@+id/Left_Click"
+                    android:layout_below="@+id/Sensitivity_layout"
+                    android:layout_centerHorizontal="true"
+                    android:fontFamily="sans-serif-light"
+                    android:gravity="center"
+                    android:text="Track PAD"
+                    android:textAlignment="center"
+                    android:textAllCaps="true"
+                    android:textAppearance="?android:attr/textAppearanceLarge"
+                    android:textColor="@color/colorTextTransparent"
+                    android:textSize="@dimen/text_size_xl" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/Left_Click"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_toLeftOf="@+id/Middle_Click"
+                    android:singleLine="false"
+                    android:text="Left Click"
+                    android:textColor="@color/colorPrimary"
+                    app:cornerRadius="@dimen/corner_radius_sm"
+                    app:strokeColor="@color/colorAccent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/Middle_Click"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="fill_parent"
+                    android:layout_below="@+id/TrackPad"
+                    android:layout_alignParentBottom="true"
+                    android:layout_centerHorizontal="true"
+                    android:text="Middle"
+                    android:textColor="@color/colorPrimary"
+                    app:cornerRadius="@dimen/corner_radius_sm"
+                    app:strokeColor="@color/colorAccent" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/Right_Click"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/TrackPad"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_toRightOf="@+id/Middle_Click"
+                    android:text="Right Click"
+                    android:textColor="@color/colorPrimary"
+                    app:cornerRadius="@dimen/corner_radius_sm"
+                    app:strokeColor="@color/colorAccent" />
+
+            </RelativeLayout>
+
+        </RelativeLayout>
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

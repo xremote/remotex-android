@@ -23,14 +23,14 @@ import java.io.IOException;
 
 public class ScreenActivity extends Activity {
 
-        TableRow buttons_r;
-
-
-    int x1 = -1,pause=5, y1 = -1,z1=0,r1=0, maxpixel = 2000, screenx = 0, screeny = 0;
+    TableRow controls_layout;
+    int touch_x = -1, touch_y = -1, mouse_ops = 9, enter_key = 0;
+    int maxpixel = 2000, screenx = 0, screeny = 0;
     SocketService objectservice;
-    boolean isbound = false,startenable=true;
-    int i1 = 3;
-    private static final String TAG = "luckymessage";
+    boolean on_waiting_screen = true, is_paused=false;
+
+    //enter_key = 0 -> not pressed, 1 -> pressed
+    //mouse_ops = 9 -> no mouse key pressed, 2 -> right click pressed
 
 
     @Override
@@ -40,114 +40,78 @@ public class ScreenActivity extends Activity {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-
-
         setContentView(R.layout.activity_screen);
-        ImageView screen_image = (ImageView) findViewById(R.id.Screen);
-        //     help.setText("Ready");
-
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
         screenx = size.x;
         screeny = size.y;
-        Log.i(TAG, screenx + ":x + y: " + screeny);
+        setControlsListener();
+    }
 
+    public void setControlsListener() {
 
-        ImageButton return_b =(ImageButton)findViewById(R.id.return_b);
+        ImageButton return_b = (ImageButton) findViewById(R.id.return_b);
         return_b.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-
-
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-
-
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-
-
-                    r1=1;
-
+                    enter_key = 1;
                 }
-
                 return true;
             }
         });
 
-
-
-
-        ImageButton right_b =(ImageButton)findViewById(R.id.R_click);
+        ImageButton right_b = (ImageButton) findViewById(R.id.R_click);
         right_b.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-
-
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
 
-
-
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-
-
-                    z1=2;
-
+                    mouse_ops = 2;
                 }
-
                 return true;
             }
         });
 
-
-
-
-
+        ImageView screen_image = (ImageView) findViewById(R.id.Screen);
         screen_image.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
 
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-
-                    //  socketServiceObject.sendMessage("!done");
-                    // specialfunction();
-                    //socketServiceObject.sendMessage("!" + x1 + ";" + y1 + ";" + "5;");
-
-                    if(!startenable) {
-                        x1 = (int) (event.getX() * maxpixel / screenx);
-                        y1 = (int) (event.getY() * maxpixel / screeny);
-
-                        Log.i(TAG, x1 + " co " + y1);
+                    if (!on_waiting_screen) {
+                        touch_x = (int) (event.getX() * maxpixel / screenx);
+                        touch_y = (int) (event.getY() * maxpixel / screeny);
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    buttons_r.setVisibility(TableRow.VISIBLE);
-                    if(startenable)
-                    { Log.i(TAG, "started");   share();  startenable=false; }
+                    controls_layout.setVisibility(TableRow.VISIBLE);
+                    if (on_waiting_screen) {
+                        share();
+                        on_waiting_screen = false;
+                    }
                 }
-
                 return true;
             }
         });
-
-
     }
 
     @Override
     protected void onResume() {
-        Intent i = new Intent(this,SocketService.class);
+        Intent i = new Intent(this, SocketService.class);
         bindService(i, serviceConnection, Context.BIND_AUTO_CREATE);
 
         super.onResume();
-        pause=5;
-        startenable=true;
+        is_paused = false;
+        on_waiting_screen = true;
         ImageView screen_image = (ImageView) findViewById(R.id.Screen);
         screen_image.setImageResource(R.drawable.screenshare);
         screen_image.invalidate();
-
-        buttons_r= (TableRow)findViewById(R.id.buttons);
-
-        buttons_r.setVisibility(TableRow.GONE);
-        //share();
+        controls_layout = (TableRow) findViewById(R.id.controls_row);
+        controls_layout.setVisibility(TableRow.GONE);
     }
 
 
@@ -155,13 +119,12 @@ public class ScreenActivity extends Activity {
     protected void onPause() {
         super.onPause();
         unbindService(serviceConnection);
-        pause=-1;
-
+        is_paused = true;
     }
 
 
     public void show() {
-        if(objectservice.bmpimage!=null) {
+        if (objectservice.bmpimage != null) {
             ImageView screen_image = (ImageView) findViewById(R.id.Screen);
             screen_image.setImageBitmap(objectservice.bmpimage);
             screen_image.invalidate();
@@ -169,25 +132,19 @@ public class ScreenActivity extends Activity {
         }
     }
 
-
-
-
-
     public void share() {
-
-
-        final Thread t = new Thread() {
+        final Thread update_screen_thread = new Thread() {
             @Override
             public void run() {
-                String msg="";
-                while(pause>0) {
+
+                while (!is_paused) {
                     try {
-
-                        objectservice.sendMessage("!" + Integer.toString(x1) +";" + Integer.toString(y1) + ";" +
-                                Integer.toString(z1)+";"  + Integer.toString(r1));
-
-
-                        x1=-1; y1=-1; z1 =9; r1 =0;
+                        objectservice.sendMessage("!" + Integer.toString(touch_x) + ";" + Integer.toString(touch_y) + ";" +
+                                Integer.toString(mouse_ops) + ";" + Integer.toString(enter_key));
+                        touch_x = -1;
+                        touch_y = -1;
+                        mouse_ops = 9;
+                        enter_key = 0;
                         objectservice.recieveimage();
 
                         runOnUiThread(new Runnable() {
@@ -195,26 +152,14 @@ public class ScreenActivity extends Activity {
                                 show();
                             }
                         });
-
-
-
-
-                    }
-
-                    catch (IOException e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
+                        Log.e(this.getClass().toString(),e.getMessage());
                     }
-                    //pause--;
                 }
             }
         };
-
-
-
-        t.start();
-
-
-
+        update_screen_thread.start();
     }
 
     private ServiceConnection serviceConnection = new ServiceConnection() {
@@ -223,14 +168,12 @@ public class ScreenActivity extends Activity {
 
             SocketService.LocalBinder binder = (SocketService.LocalBinder) iBinder;
             objectservice = binder.getService();
-            isbound=true;
-        }
+         }
 
         @Override
         public void onServiceDisconnected(ComponentName componentName) {
 
             objectservice = null;
-            isbound = false;
-        }
+         }
     };
 }

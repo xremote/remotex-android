@@ -6,8 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".MainMenu">
 
-    <include layout="@layout/content_main_menu" />
-
-
+    <include layout="@layout/main_menu_content" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

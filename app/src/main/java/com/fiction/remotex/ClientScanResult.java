@@ -1,7 +1,6 @@
 package com.fiction.remotex;
 
 
-
 public class ClientScanResult {
 
     private String IpAddr;

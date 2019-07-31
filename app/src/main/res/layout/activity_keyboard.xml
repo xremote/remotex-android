@@ -3,15 +3,14 @@
     android:layout_height="match_parent" android:background="#f0f8fa"
     tools:context=".KeyboardActivity">
 
-
     <LinearLayout
+        android:id="@+id/Keyboard_Layout"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:background="@color/colorPrimaryDark"
         >
-
 
         <LinearLayout
             android:orientation="vertical"
@@ -746,8 +745,5 @@
                 android:tag="Right"
                 android:id="@+id/Right" />
         </LinearLayout>
-
-
     </LinearLayout>
-
 </FrameLayout>
